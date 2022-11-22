@@ -49,7 +49,6 @@ async def save_name_new_category(message: Message, state: FSMContext):
         data['suspect_category'] = {}
         data['suspect_category']['name'] = category_name
 
-    await message.answer(f'✅ Категория <b>"{category_name}"</b> сохранена.')
     await message.answer(f'Укажите количество потраченных минут на неё', reply_markup=cancel_button)
     await States.add_new_category_minutes.set()
 
@@ -65,8 +64,6 @@ async def save_minutes_new_category(message: Message, state: FSMContext):
 
     async with state.proxy() as data:
         data['suspect_category']['minutes'] = minutes
-
-    await message.answer('✅ Потраченное время сохранено')
 
     async with state.proxy() as data:
         category_name = data['suspect_category']['name']

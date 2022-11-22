@@ -9,6 +9,8 @@ from tgbot.misc.states import States
 
 async def cancel_button(message: Message, state: FSMContext):
     await state.reset_state(with_data=False)
+    async with state.proxy() as data:
+        data['suspect_category'] = {}
     await message.answer('Вы вернулись в главное меню', reply_markup=main_keyboard)
 
 
