@@ -7,6 +7,7 @@ from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
 from tgbot.config import load_config
 from tgbot.filters.admin import AdminFilter
+from tgbot.handlers.simple_commands import register_all_simple_commands
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +21,7 @@ def register_all_filters(dp):
 
 
 def register_all_handlers(dp):
-    pass
-
+    register_all_simple_commands(dp)
 
 async def main():
     logging.basicConfig(
