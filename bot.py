@@ -23,6 +23,7 @@ def register_all_filters(dp):
 def register_all_handlers(dp):
     register_all_simple_commands(dp)
 
+
 async def main():
     logging.basicConfig(
         level=logging.INFO,

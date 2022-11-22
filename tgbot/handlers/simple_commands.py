@@ -4,6 +4,8 @@ from aiogram import Dispatcher
 from aiogram.dispatcher.filters import Command
 from aiogram.types import Message
 
+from tgbot.keyboards.reply import main_keyboard
+
 
 async def start_command(message: Message):
     """Обработка команды /start"""
@@ -11,7 +13,8 @@ async def start_command(message: Message):
 
     await message.answer('Добро пожаловать в бота, который поможет '
                          'вам вести статистику вашего потраченного времени!\n\n'
-                         'Чтобы лучше понять, что делает этот бот, воспользуйтесь командой <b><i>/help</i></b>.')
+                         'Чтобы лучше понять, что делает этот бот, воспользуйтесь командой <b><i>/help</i></b>.',
+                         reply_markup=main_keyboard)
 
 
 async def help_command(message: Message):
