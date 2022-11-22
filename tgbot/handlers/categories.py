@@ -4,7 +4,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, CallbackQuery
 
 from tgbot.keyboards.inline import add_new_category_button, yes_no_keyboard, generate_category_keyboard
-from tgbot.keyboards.reply import cancel_button
+from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
 
 
@@ -50,7 +50,7 @@ async def save_name_new_category(message: Message, state: FSMContext):
         data['suspect_category']['name'] = category_name
 
     await message.answer(f'✅ Категория <b>"{category_name}"</b> сохранена.')
-    await message.answer(f'Укажите количество потраченных минут на неё.')
+    await message.answer(f'Укажите количество потраченных минут на неё', reply_markup=cancel_button)
     await States.add_new_category_minutes.set()
 
 
@@ -87,6 +87,7 @@ def register_ave_minutes_new_category(dp: Dispatcher):
 async def confirm_data(call: CallbackQuery, state: FSMContext):
     """Подтверждение пользователем данных и их сохранение"""
     await call.answer(cache_time=60)
+    await call.message.delete()
     if call.data == 'yes':
         async with state.proxy() as data:
 
@@ -103,15 +104,15 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
                 data['categories'].append(suspect_category)
                 data['suspect_category'] = {}
 
-
-            print(data)
-
-        await call.message.answer('Данные сохранены')
+        await call.message.answer('✅ Категория добавлена', reply_markup=main_keyboard)
         await state.reset_state(with_data=False)
 
     elif call.data == 'no':
-        await call.message.answer('Произведена отмена')
+        async with state.proxy() as data:
+            data['suspect_category'] = {}
 
+        await call.message.answer('Произведена отмена', reply_markup=main_keyboard)
+        await state.reset_state(with_data=False)
 
 
 def register_confirm_data(dp: Dispatcher):

@@ -13,4 +13,5 @@ async def cancel_button(message: Message, state: FSMContext):
 
 
 def register_cancel_button(dp: Dispatcher):
-    dp.register_message_handler(cancel_button, Text('↩ Отмена'), state=[States.add_new_category_name])
+    dp.register_message_handler(cancel_button, Text('↩ Отмена'), state=[States.add_new_category_name,
+                                                                        States.add_new_category_minutes])

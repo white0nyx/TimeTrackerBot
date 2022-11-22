@@ -14,7 +14,7 @@ yes_no_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 
-def generate_category_keyboard(categories=[]):
+def generate_category_keyboard(categories=()):
     keyboard = InlineKeyboardMarkup(row_width=1)
 
     for i, category in enumerate(categories):
