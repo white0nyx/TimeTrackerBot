@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -7,6 +8,7 @@ from aiogram.types import Message, CallbackQuery
 
 from tgbot.keyboards.inline import stop_timer_button, generate_category_keyboard, yes_no_keyboard
 from tgbot.misc.states import States
+from tgbot.misc.work_with_text import get_the_time_in_seconds
 
 
 async def start_button(message: Message, state: FSMContext):
@@ -95,8 +97,41 @@ def register_register_no_add_button(dp: Dispatcher):
     dp.register_callback_query_handler(confirm_no_add, state=States.add_time_to_category, text=['yes', 'no'])
 
 
+async def add_time_to_category(call: CallbackQuery, state: FSMContext):
+    callback_data = call.data
+
+    async with state.proxy() as data:
+
+        if data.get('categories') is None:
+            data['categories'] = []
+
+        time = data['last_time']
+
+        for category in data['categories']:
+            if callback_data in category.values():
+                category_name = category['name']
+                category['seconds'] += get_the_time_in_seconds(data['last_time'])
+
+        data['state_time'] = None
+        data['end_time'] = None
+        data['last_start'] = None
+        data['last_time'] = None
+
+    await state.reset_state(with_data=False)
+    await call.answer(cache_time=30)
+
+    await call.message.answer(f'✅ Время {time} успешно добавлено в категорию {category_name}')
+    await call.message.delete()
+
+
+def register_add_time_to_category(dp: Dispatcher):
+    dp.register_callback_query_handler(add_time_to_category, Text(startswith='category_'),
+                                       state=States.add_time_to_category)
+
+
 def register_all_timer(dp):
     register_start_button(dp)
     register_stop_button(dp)
     register_no_add_button(dp)
     register_register_no_add_button(dp)
+    register_add_time_to_category(dp)
