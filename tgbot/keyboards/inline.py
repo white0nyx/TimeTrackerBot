@@ -1,5 +1,12 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+# Кнопка остановки секундомера
+stop_timer_button = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text='⏹ Стоп', callback_data='stop'),
+    ]
+])
+
 # Клавиатура с кнопками - да / нет
 yes_no_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
@@ -9,7 +16,7 @@ yes_no_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 ])
 
 
-def generate_category_keyboard(categories=()):
+def generate_category_keyboard(categories=(), no_add_button=False):
     """Создание клавиатуры с категориями"""
     keyboard = InlineKeyboardMarkup(row_width=1)
 
@@ -19,5 +26,8 @@ def generate_category_keyboard(categories=()):
         keyboard.insert(InlineKeyboardButton(text=name_category, callback_data=callback_data))
 
     keyboard.insert(InlineKeyboardButton(text='➕ Новая категория', callback_data='new_category'))
+
+    if no_add_button:
+        keyboard.insert(InlineKeyboardButton(text='Не добавлять', callback_data='no_add'))
 
     return keyboard

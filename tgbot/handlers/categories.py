@@ -6,6 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from tgbot.keyboards.inline import yes_no_keyboard, generate_category_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
+from tgbot.misc.work_with_text import get_the_time_in_seconds
 
 
 async def categories_button(message: Message, state: FSMContext):
@@ -38,7 +39,8 @@ async def add_new_category(call: CallbackQuery):
 
 def register_add_new_category(dp: Dispatcher):
     """Регистрация обработки кнопки НОВАЯ КАТЕГОРИЯ"""
-    dp.register_callback_query_handler(add_new_category, text='new_category')
+    dp.register_callback_query_handler(add_new_category, text='new_category', state=[None,
+                                                                                     States.add_time_to_category])
 
 
 async def save_name_new_category(message: Message, state: FSMContext):
@@ -55,7 +57,7 @@ async def save_name_new_category(message: Message, state: FSMContext):
 
 def register_save_name_new_category(dp: Dispatcher):
     """Регистрация обработчика сохранения названия категории"""
-    dp.register_message_handler(save_name_new_category, state=States.add_new_category_name)
+    dp.register_message_handler(save_name_new_category, state=[States.add_new_category_name])
 
 
 async def save_minutes_new_category(message: Message, state: FSMContext):
@@ -63,7 +65,8 @@ async def save_minutes_new_category(message: Message, state: FSMContext):
     minutes = message.text
 
     async with state.proxy() as data:
-        data['suspect_category']['minutes'] = minutes
+        data['suspect_category']['minutes'] = int(minutes)
+        data['suspect_category']['seconds'] = int(minutes) * 60
 
     async with state.proxy() as data:
         category_name = data['suspect_category']['name']
@@ -78,7 +81,7 @@ async def save_minutes_new_category(message: Message, state: FSMContext):
 
 def register_ave_minutes_new_category(dp: Dispatcher):
     """Регистрация обработчика сохранения потраченных минут"""
-    dp.register_message_handler(save_minutes_new_category, state=States.add_new_category_minutes)
+    dp.register_message_handler(save_minutes_new_category, state=[States.add_new_category_minutes])
 
 
 async def confirm_data(call: CallbackQuery, state: FSMContext):
@@ -101,7 +104,20 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
                 data['categories'].append(suspect_category)
                 data['suspect_category'] = {}
 
+            if data.get('last_time') is not None:
+                new_time = get_the_time_in_seconds(data.get('last_time'))
+
+                old_time = int(data['categories'][-1]['minutes']) * 60
+
+                data['categories'][-1]['seconds'] = old_time + new_time
+
+                data['state_time'] = None
+                data['end_time'] = None
+                data['last_start'] = None
+                data['last_time'] = None
+
         await call.message.answer('✅ Категория добавлена', reply_markup=main_keyboard)
+
         await state.reset_state(with_data=False)
 
     elif call.data == 'no':
