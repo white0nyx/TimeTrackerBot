@@ -14,6 +14,12 @@ async def start_command(message: Message):
                          'Чтобы лучше понять, что делает этот бот, воспользуйтесь командой <b><i>/help</i></b>.')
 
 
+async def help_command(message: Message):
+    """Обработка команды /help"""
+    await message.answer('Когда-нибудь я напишу здесь сообщение, которое будет помогать пользователям')
+
+
 def register_all_simple_commands(dp: Dispatcher):
     """Регистрация всех простых команд"""
     dp.register_message_handler(start_command, Command('start'))
+    dp.register_message_handler(help_command, Command('help'))
