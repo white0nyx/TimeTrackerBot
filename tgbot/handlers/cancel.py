@@ -8,6 +8,7 @@ from tgbot.misc.states import States
 
 
 async def cancel_button(message: Message, state: FSMContext):
+    """Обработка нажатия на кнопку отмены"""
     await state.reset_state(with_data=False)
     async with state.proxy() as data:
         data['suspect_category'] = {}
@@ -15,5 +16,6 @@ async def cancel_button(message: Message, state: FSMContext):
 
 
 def register_cancel_button(dp: Dispatcher):
+    """Регистрация обработчика кнопки отмена"""
     dp.register_message_handler(cancel_button, Text('↩ Отмена'), state=[States.add_new_category_name,
                                                                         States.add_new_category_minutes])

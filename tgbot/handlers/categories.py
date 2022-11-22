@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, CallbackQuery
 
-from tgbot.keyboards.inline import add_new_category_button, yes_no_keyboard, generate_category_keyboard
+from tgbot.keyboards.inline import yes_no_keyboard, generate_category_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
 
@@ -113,6 +113,7 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
 
 
 def register_confirm_data(dp: Dispatcher):
+    """Регистрация обработчика подтверждения данных"""
     dp.register_callback_query_handler(confirm_data, text=['yes', 'no'], state=States.confirm_data)
 
 

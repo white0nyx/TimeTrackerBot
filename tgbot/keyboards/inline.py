@@ -1,11 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-add_new_category_button = InlineKeyboardMarkup(inline_keyboard=[
-    [
-        InlineKeyboardButton(text='➕ Новая категория', callback_data='new_category')
-    ]
-])
-
+# Клавиатура с кнопками - да / нет
 yes_no_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='Да', callback_data='yes'),
@@ -15,6 +10,7 @@ yes_no_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 
 
 def generate_category_keyboard(categories=()):
+    """Создание клавиатуры с категориями"""
     keyboard = InlineKeyboardMarkup(row_width=1)
 
     for i, category in enumerate(categories):

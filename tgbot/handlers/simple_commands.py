@@ -24,6 +24,7 @@ async def help_command(message: Message):
 
 
 async def my_data_command(message: Message, state: FSMContext):
+    """Вывод всех сохранных данных из стейта"""
     async with state.proxy() as data:
         await message.answer(str(dict(data)))
 
