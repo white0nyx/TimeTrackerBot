@@ -12,3 +12,10 @@ main_keyboard = ReplyKeyboardMarkup(keyboard=[
         KeyboardButton(text='📊 Статистика'),
     ],
 ], resize_keyboard=True)
+
+# Кнопка отмены
+cancel_button = ReplyKeyboardMarkup(keyboard=[
+    [
+        KeyboardButton(text='↩ Отмена')
+    ]
+], resize_keyboard=True)
