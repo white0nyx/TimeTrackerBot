@@ -7,6 +7,7 @@ class States(StatesGroup):
     """Класс стейтов"""
 
     # Добавление новой категории
+    my_categories = State()
     add_new_category_name = State()
     add_new_category_based_minutes = State()
     confirm_data = State()

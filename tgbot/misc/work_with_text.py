@@ -22,3 +22,18 @@ def get_statistic(categories):
         text += f'{category["name"]} - {convert_to_preferred_format(category["seconds"])}\n'
 
     return text
+
+
+def get_category_info_message(category_n: str, categories: list):
+
+    category = {}
+    for category in categories:
+        if category['callback_data'] == category_n:
+            break
+    category_name = category.get("name")
+    category_all_time = convert_to_preferred_format(category.get('seconds'))
+
+    text = f'{category_name}\n\n' \
+           f'Всего потрачено времени: {category_all_time}'
+
+    return text

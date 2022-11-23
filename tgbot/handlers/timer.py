@@ -1,5 +1,4 @@
 import datetime
-import re
 
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -22,7 +21,7 @@ async def start_button(message: Message, state: FSMContext):
 
 
 def register_start_button(dp: Dispatcher):
-    dp.register_message_handler(start_button, Text('▶ Старт'))
+    dp.register_message_handler(start_button, Text('▶ Старт'), state=[None, States.my_categories])
 
 
 async def stop_button(call: CallbackQuery, state: FSMContext):
@@ -60,7 +59,7 @@ async def stop_button(call: CallbackQuery, state: FSMContext):
 
 
 def register_stop_button(dp: Dispatcher):
-    dp.register_callback_query_handler(stop_button, text='stop')
+    dp.register_callback_query_handler(stop_button, text='stop', state=[None, States.my_categories])
 
 
 async def no_add_button(call: CallbackQuery):
