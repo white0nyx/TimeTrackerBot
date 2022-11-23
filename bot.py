@@ -4,6 +4,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
+from aiogram.types import BotCommand
 
 from tgbot.config import load_config
 from tgbot.filters.admin import AdminFilter
@@ -32,7 +33,6 @@ def register_all_handlers(dp):
     register_all_statistic(dp)
 
 
-
 async def main():
     logging.basicConfig(
         level=logging.INFO,
@@ -51,6 +51,9 @@ async def main():
     register_all_filters(dp)
     register_all_handlers(dp)
 
+    await dp.bot.set_my_commands([BotCommand('start', 'Запустить бота'),
+                                  BotCommand('help', 'Помощь'),
+                                  BotCommand('my_data', 'Получить данные')])
     # start
     try:
         await dp.start_polling()
