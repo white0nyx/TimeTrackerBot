@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
@@ -69,6 +71,14 @@ async def save_based_minutes_new_category(message: Message, state: FSMContext):
     async with state.proxy() as data:
         data['suspect_category']['based_minutes'] = int(minutes)
         data['suspect_category']['seconds'] = int(minutes) * 60
+        data['suspect_category']['monday'] = 0
+        data['suspect_category']['tuesday'] = 0
+        data['suspect_category']['wednesday'] = 0
+        data['suspect_category']['thursday'] = 0
+        data['suspect_category']['friday'] = 0
+        data['suspect_category']['saturday'] = 0
+        data['suspect_category']['sunday'] = 0
+        data['suspect_category']['operations'] = {}
 
     async with state.proxy() as data:
         category_name = data['suspect_category']['name']
@@ -113,10 +123,27 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
 
                 data['categories'][-1]['seconds'] = old_time + new_time
 
-                data['state_time'] = None
-                data['end_time'] = None
-                data['last_start'] = None
-                data['last_time'] = None
+                day_index = data['day_index']
+                days = {0: 'monday',
+                        1: 'tuesday',
+                        2: 'wednesday',
+                        3: 'thursday',
+                        4: 'friday',
+                        5: 'saturday',
+                        6: 'sunday'}
+
+                data['categories'][-1][days[day_index]] = new_time
+
+                date_now = str(datetime.now()).split()[0]
+                if data['categories'][-1]['operations'].get(date_now) is None:
+                    data['categories'][-1]['operations'][date_now] = new_time
+                else:
+                    data['categories'][-1]['operations'][date_now] += new_time
+
+            data['state_time'] = None
+            data['end_time'] = None
+            data['last_start'] = None
+            data['last_time'] = None
 
         await call.message.answer('✅ Категория добавлена', reply_markup=main_keyboard)
 
@@ -126,7 +153,7 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
         async with state.proxy() as data:
             data['suspect_category'] = {}
 
-        await call.message.answer('Произведена отмена', reply_markup=main_keyboard)
+        await call.message.answer('❌ Произведена отмена', reply_markup=main_keyboard)
         await state.reset_state(with_data=False)
 
 

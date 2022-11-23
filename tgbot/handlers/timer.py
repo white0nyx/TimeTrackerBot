@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -31,7 +31,7 @@ async def stop_button(call: CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
 
         if data.get('end_time') is None:
-            now = datetime.datetime.now()
+            now = datetime.now()
             send_time = True
         else:
             now = data.get('end_time')
@@ -40,6 +40,7 @@ async def stop_button(call: CallbackQuery, state: FSMContext):
         all_time = str(now - data['last_start']).split('.')[0]
         data['last_time'] = all_time
         data['end_time'] = now
+        data['day_index'] = datetime.weekday(call.message.date)
 
         categories = data.get('categories')
 
@@ -98,7 +99,6 @@ def register_register_no_add_button(dp: Dispatcher):
 
 async def add_time_to_category(call: CallbackQuery, state: FSMContext):
     callback_data = call.data
-
     async with state.proxy() as data:
 
         if data.get('categories') is None:
@@ -109,12 +109,33 @@ async def add_time_to_category(call: CallbackQuery, state: FSMContext):
         for category in data['categories']:
             if callback_data in category.values():
                 category_name = category['name']
-                category['seconds'] += get_the_time_in_seconds(data['last_time'])
+                time_in_seconds = get_the_time_in_seconds(data['last_time'])
+                category['seconds'] += time_in_seconds
+
+                day_index = data['day_index']
+
+                days = {0: 'monday',
+                        1: 'tuesday',
+                        2: 'wednesday',
+                        3: 'thursday',
+                        4: 'friday',
+                        5: 'saturday',
+                        6: 'sunday'}
+
+                category[days[day_index]] += time_in_seconds
+
+                date_now = str(datetime.now()).split()[0]
+                if category['operations'].get(date_now) is None:
+                    category['operations'][date_now] = time_in_seconds
+                else:
+                    category['operations'][date_now] += time_in_seconds
+
 
         data['state_time'] = None
         data['end_time'] = None
         data['last_start'] = None
         data['last_time'] = None
+        data['day_index'] = None
 
     await state.reset_state(with_data=False)
     await call.answer(cache_time=30)
