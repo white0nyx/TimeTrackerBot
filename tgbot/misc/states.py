@@ -8,7 +8,7 @@ class States(StatesGroup):
 
     # Добавление новой категории
     add_new_category_name = State()
-    add_new_category_minutes = State()
+    add_new_category_based_minutes = State()
     confirm_data = State()
 
     # Добавление времени к категории

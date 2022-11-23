@@ -52,7 +52,7 @@ async def save_name_new_category(message: Message, state: FSMContext):
         data['suspect_category']['name'] = category_name
 
     await message.answer(f'Укажите количество потраченных минут на неё', reply_markup=cancel_button)
-    await States.add_new_category_minutes.set()
+    await States.add_new_category_based_minutes.set()
 
 
 def register_save_name_new_category(dp: Dispatcher):
@@ -60,17 +60,17 @@ def register_save_name_new_category(dp: Dispatcher):
     dp.register_message_handler(save_name_new_category, state=[States.add_new_category_name])
 
 
-async def save_minutes_new_category(message: Message, state: FSMContext):
+async def save_based_minutes_new_category(message: Message, state: FSMContext):
     """Сохранение количества потраченных минут и запрос подтверждения данных"""
     minutes = message.text
 
     async with state.proxy() as data:
-        data['suspect_category']['minutes'] = int(minutes)
+        data['suspect_category']['based_minutes'] = int(minutes)
         data['suspect_category']['seconds'] = int(minutes) * 60
 
     async with state.proxy() as data:
         category_name = data['suspect_category']['name']
-        category_minutes = data['suspect_category']['minutes']
+        category_minutes = data['suspect_category']['based_minutes']
 
     await message.answer(f'Подтвердите введённые данные: \n\n'
                          f'Категория: {category_name}\n'
@@ -79,9 +79,9 @@ async def save_minutes_new_category(message: Message, state: FSMContext):
     await States.confirm_data.set()
 
 
-def register_ave_minutes_new_category(dp: Dispatcher):
+def register_save_minutes_new_category(dp: Dispatcher):
     """Регистрация обработчика сохранения потраченных минут"""
-    dp.register_message_handler(save_minutes_new_category, state=[States.add_new_category_minutes])
+    dp.register_message_handler(save_based_minutes_new_category, state=[States.add_new_category_based_minutes])
 
 
 async def confirm_data(call: CallbackQuery, state: FSMContext):
@@ -94,8 +94,8 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
             suspect_category = data['suspect_category']
 
             if data.get('categories') is not None:
-                data['categories'].append(suspect_category)
                 suspect_category['callback_data'] = 'category_' + str(len(data['categories']) + 1)
+                data['categories'].append(suspect_category)
                 data['suspect_category'] = {}
 
             else:
@@ -107,7 +107,7 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
             if data.get('last_time') is not None:
                 new_time = get_the_time_in_seconds(data.get('last_time'))
 
-                old_time = int(data['categories'][-1]['minutes']) * 60
+                old_time = int(data['categories'][-1]['based_minutes']) * 60
 
                 data['categories'][-1]['seconds'] = old_time + new_time
 
@@ -138,5 +138,5 @@ def register_all_categories_handlers(dp: Dispatcher):
     register_categories_button(dp)
     register_add_new_category(dp)
     register_save_name_new_category(dp)
-    register_ave_minutes_new_category(dp)
+    register_save_minutes_new_category(dp)
     register_confirm_data(dp)
