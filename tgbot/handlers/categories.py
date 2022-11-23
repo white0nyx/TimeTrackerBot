@@ -165,6 +165,7 @@ def register_confirm_data(dp: Dispatcher):
 async def category_inline_button(call: CallbackQuery, state: FSMContext):
     """Обработка нажатия на Inline-кнопку категории в состоянии my_categories"""
     callback_data = call.data
+    await call.answer(cache_time=5)
 
     async with state.proxy() as data:
         categories = data.get('categories')

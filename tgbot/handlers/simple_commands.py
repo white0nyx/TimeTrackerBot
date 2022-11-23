@@ -29,8 +29,6 @@ async def my_data_command(message: Message, state: FSMContext):
     """Вывод всех сохранных данных из стейта"""
     async with state.proxy() as data:
         await message.answer(str(dict(data)))
-        x = '"'
-        print(str(dict(data)).replace("'", x).replace('None', 'null'))
 
 
 def register_all_simple_commands(dp: Dispatcher):
