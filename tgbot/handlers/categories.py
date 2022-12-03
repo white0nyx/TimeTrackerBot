@@ -114,7 +114,6 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
 
             suspect_category['callback_data'] = 'category_' + str(len(user['categories']) + 1)
             user['categories'].append(suspect_category)
-            del data['suspect_category']
 
             if data.get('last_time') is not None:
                 new_time = get_the_time_in_seconds(data.get('last_time'))
@@ -140,19 +139,18 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
                 else:
                     user['categories'][-1]['operations'][date_now] += new_time
 
-
             update_user_data(user_id, user)
 
         await call.message.answer('✅ Категория добавлена', reply_markup=main_keyboard)
 
-        await state.reset_state(with_data=False)
+        await state.reset_state(with_data=True)
 
     elif call.data == 'no':
         async with state.proxy() as data:
             data['suspect_category'] = {}
 
         await call.message.answer('❌ Произведена отмена', reply_markup=main_keyboard)
-        await state.reset_state(with_data=False)
+        await state.reset_state(with_data=True)
 
 
 def register_confirm_data(dp: Dispatcher):

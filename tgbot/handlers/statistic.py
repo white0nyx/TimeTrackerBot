@@ -4,18 +4,20 @@ from aiogram.dispatcher.filters import Text
 from aiogram.types import Message
 
 from tgbot.misc.states import States
+from tgbot.misc.work_with_json import get_user_from_json_db
 from tgbot.misc.work_with_text import get_statistic
 
 
 async def statistic_button(message: Message, state: FSMContext):
+    user_id = message.from_user.id
 
-    async with state.proxy() as data:
+    user = get_user_from_json_db(user_id)
 
-        if data.get('categories') is None:
-            await message.answer('Для получения статистики у вас должна быть установлена хотя бы одна категория')
-            return
+    if not user.get('categories'):
+        await message.answer('Для получения статистики у вас должна быть установлена хотя бы одна категория')
+        return
 
-        categories = data.get('categories')
+    categories = user.get('categories')
 
     text = get_statistic(categories)
 
