@@ -118,7 +118,7 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
             if data.get('last_time') is not None:
                 new_time = get_the_time_in_seconds(data.get('last_time'))
 
-                old_time = int(data['categories'][-1]['based_minutes']) * 60
+                old_time = int(user['categories'][-1]['based_minutes']) * 60
 
                 user['categories'][-1]['seconds'] = old_time + new_time
 
@@ -163,8 +163,9 @@ async def category_inline_button(call: CallbackQuery, state: FSMContext):
     callback_data = call.data
     await call.answer(cache_time=5)
 
-    async with state.proxy() as data:
-        categories = data.get('categories')
+    user_id = call.from_user.id
+    user = get_user_from_json_db(user_id)
+    categories = user.get('categories')
 
     text = get_category_info_message(callback_data, categories)
 

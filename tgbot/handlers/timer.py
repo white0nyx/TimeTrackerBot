@@ -7,6 +7,7 @@ from aiogram.types import Message, CallbackQuery
 
 from tgbot.keyboards.inline import stop_timer_button, generate_category_keyboard, yes_no_keyboard
 from tgbot.misc.states import States
+from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data
 from tgbot.misc.work_with_text import get_the_time_in_seconds
 
 
@@ -42,7 +43,9 @@ async def stop_button(call: CallbackQuery, state: FSMContext):
         data['end_time'] = now
         data['day_index'] = datetime.weekday(call.message.date)
 
-        categories = data.get('categories')
+    user_id = call.from_user.id
+    user = get_user_from_json_db(user_id)
+    categories = user.get('categories')
 
     if send_time:
         await call.message.answer(f'⏱ Прошло {all_time}')
@@ -79,13 +82,8 @@ async def confirm_no_add(call: CallbackQuery, state: FSMContext):
 
     if call.data == 'yes':
         await call.answer(f'Время {time} не было добавлено!')
-        await state.reset_state(with_data=False)
+        await state.reset_state(with_data=True)
         await call.message.delete()
-        async with state.proxy() as data:
-            data['state_time'] = None
-            data['end_time'] = None
-            data['last_start'] = None
-            data['last_time'] = None
 
     elif call.data == 'no':
         await call.answer('Продолжите добавление времени', cache_time=1)
@@ -101,12 +99,12 @@ async def add_time_to_category(call: CallbackQuery, state: FSMContext):
     callback_data = call.data
     async with state.proxy() as data:
 
-        if data.get('categories') is None:
-            data['categories'] = []
+        user_id = call.from_user.id
+        user = get_user_from_json_db(user_id)
 
         time = data['last_time']
 
-        for category in data['categories']:
+        for category in user['categories']:
             if callback_data in category.values():
                 category_name = category['name']
                 time_in_seconds = get_the_time_in_seconds(data['last_time'])
@@ -130,14 +128,9 @@ async def add_time_to_category(call: CallbackQuery, state: FSMContext):
                 else:
                     category['operations'][date_now] += time_in_seconds
 
+        update_user_data(user_id, user)
 
-        data['state_time'] = None
-        data['end_time'] = None
-        data['last_start'] = None
-        data['last_time'] = None
-        data['day_index'] = None
-
-    await state.reset_state(with_data=False)
+    await state.reset_state(with_data=True)
     await call.answer(cache_time=30)
 
     await call.message.answer(f'✅ Время {time} успешно добавлено в категорию {category_name}')
