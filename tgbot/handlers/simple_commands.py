@@ -1,5 +1,6 @@
 # Обработчики простых команд
 import datetime
+import json
 
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -18,6 +19,20 @@ async def start_command(message: Message):
                          'вам вести статистику вашего потраченного времени!\n\n'
                          'Чтобы лучше понять, что делает этот бот, воспользуйтесь командой <b><i>/help</i></b>.',
                          reply_markup=main_keyboard)
+
+    user_id = message.from_user.id
+    username = message.from_user.username
+    full_name = message.from_user.full_name
+
+    with open('data/users.json', 'r+', encoding='utf-8') as db:
+        users = json.load(db)
+
+        if str(user_id) not in users.keys():
+            users[user_id] = {'username': username, 'full_name': full_name}
+
+        db.seek(0)
+        json.dump(users, db, indent=4, ensure_ascii=False)
+
 
 
 async def help_command(message: Message):

@@ -1,5 +1,7 @@
 import asyncio
+import json
 import logging
+import os.path
 
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -50,6 +52,10 @@ async def main():
     register_all_middlewares(dp, config)
     register_all_filters(dp)
     register_all_handlers(dp)
+
+    if not os.path.exists('data/users.json'):
+        with open('data/users.json', 'w', encoding='utf-8') as users:
+            json.dump({}, users, indent=4, ensure_ascii=False)
 
     await dp.bot.set_my_commands([BotCommand('start', 'Запустить бота'),
                                   BotCommand('help', 'Помощь'),
