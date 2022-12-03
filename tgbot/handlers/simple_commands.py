@@ -9,6 +9,7 @@ from aiogram.types import Message
 
 from tgbot.keyboards.reply import main_keyboard
 from tgbot.misc.states import States
+from tgbot.misc.work_with_json import get_user_from_json_db
 
 
 async def start_command(message: Message):
@@ -43,7 +44,9 @@ async def help_command(message: Message):
 async def my_data_command(message: Message, state: FSMContext):
     """Вывод всех сохранных данных из стейта"""
     async with state.proxy() as data:
-        await message.answer(str(dict(data)).replace("'", '"').replace('None', 'null'))
+        user_id = message.from_user.id
+        user_info = str(get_user_from_json_db(user_id))
+        await message.answer(f"""<code>{user_info.replace("'", '"')}</code>""")
 
 
 def register_all_simple_commands(dp: Dispatcher):
