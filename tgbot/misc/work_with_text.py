@@ -7,12 +7,12 @@ def get_the_time_in_seconds(str_time: str):
 
 
 def convert_to_preferred_format(sec):
-    sec = sec % (24 * 3600)
+    # sec = sec % (24 * 3600)
     hour = sec // 3600
     sec %= 3600
     minutes = sec // 60
     sec %= 60
-    return "%d:%02d:%02d" % (hour, minutes, sec)
+    return "%02d:%02d:%02d" % (hour, minutes, sec)
 
 
 def get_statistic(categories):
