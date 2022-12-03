@@ -28,11 +28,11 @@ async def start_command(message: Message):
         users = json.load(db)
 
         if str(user_id) not in users.keys():
-            users[user_id] = {'username': username, 'full_name': full_name}
+            users[user_id] = {'user_data': {'id': user_id, 'username': username, 'full_name': full_name},
+                              'categories': []}
 
         db.seek(0)
         json.dump(users, db, indent=4, ensure_ascii=False)
-
 
 
 async def help_command(message: Message):

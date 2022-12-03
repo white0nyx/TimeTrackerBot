@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from aiogram import Dispatcher
@@ -8,16 +9,19 @@ from aiogram.types import Message, CallbackQuery
 from tgbot.keyboards.inline import yes_no_keyboard, generate_category_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
+from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data
 from tgbot.misc.work_with_text import get_the_time_in_seconds, get_category_info_message
 
 
 async def my_categories_button(message: Message, state: FSMContext):
     """Обработка нажатия на кнопку КАТЕГОРИИ"""
 
-    async with state.proxy() as data:
-        categories = data.get('categories')
+    user_id = str(message.from_user.id)
 
-    if categories is None:
+    user = get_user_from_json_db(user_id)
+    categories = user.get('categories')
+
+    if not categories:
         await message.answer('У вас пока нет ни одной добавленной категории.\n\n'
                              'Чтобы добавить категорию воспользуйтесь кнопкой ниже.',
                              reply_markup=generate_category_keyboard())
@@ -100,20 +104,23 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
     """Подтверждение пользователем данных и их сохранение"""
     await call.answer(cache_time=60)
     await call.message.delete()
+    user_id = call.from_user.id
     if call.data == 'yes':
+
+        user = get_user_from_json_db(user_id)
         async with state.proxy() as data:
 
             suspect_category = data['suspect_category']
 
             if data.get('categories') is not None:
                 suspect_category['callback_data'] = 'category_' + str(len(data['categories']) + 1)
-                data['categories'].append(suspect_category)
+                user['categories'].append(suspect_category)
                 data['suspect_category'] = {}
 
             else:
                 data['categories'] = []
                 suspect_category['callback_data'] = 'category_' + str(len(data['categories']) + 1)
-                data['categories'].append(suspect_category)
+                user['categories'].append(suspect_category)
                 data['suspect_category'] = {}
 
             if data.get('last_time') is not None:
@@ -121,7 +128,7 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
 
                 old_time = int(data['categories'][-1]['based_minutes']) * 60
 
-                data['categories'][-1]['seconds'] = old_time + new_time
+                user['categories'][-1]['seconds'] = old_time + new_time
 
                 day_index = data['day_index']
                 days = {0: 'monday',
@@ -132,18 +139,20 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
                         5: 'saturday',
                         6: 'sunday'}
 
-                data['categories'][-1][days[day_index]] = new_time
+                user['categories'][-1][days[day_index]] = new_time
 
                 date_now = str(datetime.now()).split()[0]
-                if data['categories'][-1]['operations'].get(date_now) is None:
-                    data['categories'][-1]['operations'][date_now] = new_time
+                if user['categories'][-1]['operations'].get(date_now) is None:
+                    user['categories'][-1]['operations'][date_now] = new_time
                 else:
-                    data['categories'][-1]['operations'][date_now] += new_time
+                    user['categories'][-1]['operations'][date_now] += new_time
 
             data['state_time'] = None
             data['end_time'] = None
             data['last_start'] = None
             data['last_time'] = None
+
+            update_user_data(user_id, user)
 
         await call.message.answer('✅ Категория добавлена', reply_markup=main_keyboard)
 

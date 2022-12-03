@@ -54,8 +54,8 @@ async def main():
     register_all_handlers(dp)
 
     if not os.path.exists('data/users.json'):
-        with open('data/users.json', 'w', encoding='utf-8') as users:
-            json.dump({}, users, indent=4, ensure_ascii=False)
+        with open('data/users.json', 'w', encoding='utf-8') as db:
+            json.dump({}, db, indent=4, ensure_ascii=False)
 
     await dp.bot.set_my_commands([BotCommand('start', 'Запустить бота'),
                                   BotCommand('help', 'Помощь'),
