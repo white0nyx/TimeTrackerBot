@@ -112,16 +112,9 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
 
             suspect_category = data['suspect_category']
 
-            if data.get('categories') is not None:
-                suspect_category['callback_data'] = 'category_' + str(len(data['categories']) + 1)
-                user['categories'].append(suspect_category)
-                data['suspect_category'] = {}
-
-            else:
-                data['categories'] = []
-                suspect_category['callback_data'] = 'category_' + str(len(data['categories']) + 1)
-                user['categories'].append(suspect_category)
-                data['suspect_category'] = {}
+            suspect_category['callback_data'] = 'category_' + str(len(user['categories']) + 1)
+            user['categories'].append(suspect_category)
+            del data['suspect_category']
 
             if data.get('last_time') is not None:
                 new_time = get_the_time_in_seconds(data.get('last_time'))
@@ -147,10 +140,6 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
                 else:
                     user['categories'][-1]['operations'][date_now] += new_time
 
-            data['state_time'] = None
-            data['end_time'] = None
-            data['last_start'] = None
-            data['last_time'] = None
 
             update_user_data(user_id, user)
 
