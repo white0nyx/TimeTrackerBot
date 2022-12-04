@@ -31,3 +31,17 @@ def generate_category_keyboard(categories=(), no_add_button=False):
         keyboard.insert(InlineKeyboardButton(text='Не добавлять', callback_data='no_add'))
 
     return keyboard
+
+
+category_buttons = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text='➕ Добавить время', callback_data='add_time'),
+        InlineKeyboardButton(text='➖ Вычесть время', callback_data='subtract_time'),
+    ],
+    [
+        InlineKeyboardButton(text='✏ Изменить название', callback_data='change_title')
+    ],
+    [
+        InlineKeyboardButton(text='❌ Удалить категорию', callback_data='delete_category')
+    ],
+])

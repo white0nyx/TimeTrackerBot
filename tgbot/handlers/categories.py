@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 from aiogram import Dispatcher
@@ -10,7 +9,7 @@ from tgbot.keyboards.inline import yes_no_keyboard, generate_category_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data
-from tgbot.misc.work_with_text import get_the_time_in_seconds, get_category_info_message
+from tgbot.misc.work_with_text import get_the_time_in_seconds
 
 
 async def my_categories_button(message: Message, state: FSMContext):
@@ -158,24 +157,6 @@ def register_confirm_data(dp: Dispatcher):
     dp.register_callback_query_handler(confirm_data, text=['yes', 'no'], state=States.confirm_data)
 
 
-async def category_inline_button(call: CallbackQuery, state: FSMContext):
-    """Обработка нажатия на Inline-кнопку категории в состоянии my_categories"""
-    callback_data = call.data
-    await call.answer(cache_time=5)
-
-    user_id = call.from_user.id
-    user = get_user_from_json_db(user_id)
-    categories = user.get('categories')
-
-    text = get_category_info_message(callback_data, categories)
-
-    await call.message.answer(text=text)
-
-
-def register_category_inline_button(dp: Dispatcher):
-    dp.register_callback_query_handler(category_inline_button, state=[None, States.my_categories])
-
-
 def register_all_categories_handlers(dp: Dispatcher):
     """Регистрация всех обработчиков категорий"""
     register_my_categories_button(dp)
@@ -183,4 +164,3 @@ def register_all_categories_handlers(dp: Dispatcher):
     register_save_name_new_category(dp)
     register_save_minutes_new_category(dp)
     register_confirm_data(dp)
-    register_category_inline_button(dp)

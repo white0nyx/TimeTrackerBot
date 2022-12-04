@@ -12,6 +12,7 @@ from tgbot.config import load_config
 from tgbot.filters.admin import AdminFilter
 from tgbot.handlers.cancel import register_cancel_button
 from tgbot.handlers.categories import register_all_categories_handlers
+from tgbot.handlers.category_edit import register_all_category_edit
 from tgbot.handlers.simple_commands import register_all_simple_commands
 from tgbot.handlers.statistic import register_all_statistic
 from tgbot.handlers.timer import register_all_timer
@@ -32,6 +33,7 @@ def register_all_handlers(dp):
     register_cancel_button(dp)
     register_all_timer(dp)
     register_all_categories_handlers(dp)
+    register_all_category_edit(dp)
     register_all_statistic(dp)
 
 

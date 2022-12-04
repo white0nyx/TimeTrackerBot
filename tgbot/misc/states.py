@@ -14,3 +14,19 @@ class States(StatesGroup):
 
     # Добавление времени к категории
     add_time_to_category = State()
+
+    # Меню категории
+    category_menu = State()
+
+    # Ожидание минут для добавления
+    wait_add_minutes = State()
+    confirm_add_minutes = State()
+
+    # Ожидание минут для вычитания
+    wait_sub_minutes = State()
+
+    # Ожидание нового названия
+    wait_new_title = State()
+
+    # Подтверждение удаления категории
+    delete_category_confirm = State()
