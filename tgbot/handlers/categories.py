@@ -111,7 +111,13 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
 
             suspect_category = data['suspect_category']
 
-            suspect_category['callback_data'] = 'category_' + str(len(user['categories']) + 1)
+            if len(user['categories']) == 0:
+                new_number = 0
+
+            else:
+                new_number = int(user['categories'][-1]['callback_data'].split('category_')[-1]) + 1
+
+            suspect_category['callback_data'] = 'category_' + str(new_number)
             user['categories'].append(suspect_category)
 
             if data.get('last_time') is not None:
