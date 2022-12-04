@@ -64,7 +64,7 @@ def register_edit_category(dp: Dispatcher):
     dp.register_callback_query_handler(edit_category, state=[None, States.category_menu])
 
 
-async def confirm_adding_time(message: Message, state: FSMContext):
+async def confirm_changing_time(message: Message, state: FSMContext):
     time_in_minutes = int(message.text)
     if await state.get_state() == States.wait_add_minutes.state:
         action = 'добавить'
@@ -82,14 +82,13 @@ async def confirm_adding_time(message: Message, state: FSMContext):
     await message.answer(f'Вы хотите {action} {time_in_minutes} {minutes}?', reply_markup=yes_no_keyboard)
 
 
-def register_confirm_adding_time(dp: Dispatcher):
-    dp.register_message_handler(confirm_adding_time, state=[States.wait_add_minutes, States.wait_sub_minutes])
+def register_confirm_changing_time(dp: Dispatcher):
+    dp.register_message_handler(confirm_changing_time, state=[States.wait_add_minutes, States.wait_sub_minutes])
 
 
-async def add_time(call: CallbackQuery, state: FSMContext):
+async def change_time(call: CallbackQuery, state: FSMContext):
     if call.data == 'no':
 
-        print(await state.get_state())
         if await state.get_state() == States.confirm_add_minutes.state:
             action = 'добавление'
             state_again = States.wait_add_minutes
@@ -144,12 +143,64 @@ async def add_time(call: CallbackQuery, state: FSMContext):
         await state.reset_state(with_data=True)
 
 
-def register_add_time(dp: Dispatcher):
-    dp.register_callback_query_handler(add_time, state=[States.confirm_add_minutes, States.confirm_sub_minutes])
+def register_change_time(dp: Dispatcher):
+    dp.register_callback_query_handler(change_time, state=[States.confirm_add_minutes, States.confirm_sub_minutes])
+
+
+async def ask_category_title(message: Message, state: FSMContext):
+    new_title = message.text
+
+    async with state.proxy() as data:
+        data['new_category_title'] = new_title
+
+    await message.answer(f'Вы уверены, что хотите изменить название категории на "{new_title}"?',
+                         reply_markup=yes_no_keyboard)
+
+    await States.confirm_new_title.set()
+
+
+def register_ask_category_title(dp: Dispatcher):
+    dp.register_message_handler(ask_category_title, state=[States.wait_new_title])
+
+
+async def confirm_new_category_title(call: CallbackQuery, state: FSMContext):
+
+    await call.answer(cache_time=10)
+
+    if call.data == 'no':
+        await call.message.delete()
+        await call.message.answer('Введите другое название или воспользуйтесь отменой')
+        await States.wait_new_title.set()
+
+    else:
+
+        async with state.proxy() as data:
+            new_category_title = data['new_category_title']
+            old_category_title = data['changing_category']
+
+        user_id = call.from_user.id
+        user = get_user_from_json_db(user_id)
+        categories = user['categories']
+
+        for category in categories:
+            if category['name'] == old_category_title:
+                category['name'] = new_category_title
+                break
+
+        update_user_data(user_id, user)
+
+        await call.message.answer('Название категории успешно изменено!')
+        await state.reset_state(with_data=True)
+
+
+def register_confirm_new_category_title(dp: Dispatcher):
+    dp.register_callback_query_handler(confirm_new_category_title, state=States.confirm_new_title)
 
 
 def register_all_category_edit(dp):
     register_category_inline_button(dp)
     register_edit_category(dp)
-    register_confirm_adding_time(dp)
-    register_add_time(dp)
+    register_confirm_changing_time(dp)
+    register_change_time(dp)
+    register_ask_category_title(dp)
+    register_confirm_new_category_title(dp)

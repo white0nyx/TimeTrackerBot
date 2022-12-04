@@ -28,6 +28,7 @@ class States(StatesGroup):
 
     # Ожидание нового названия
     wait_new_title = State()
+    confirm_new_title = State()
 
     # Подтверждение удаления категории
     delete_category_confirm = State()
