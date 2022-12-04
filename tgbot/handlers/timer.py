@@ -25,7 +25,7 @@ async def start_button(message: Message, state: FSMContext):
 
 
 def register_start_button(dp: Dispatcher):
-    dp.register_message_handler(start_button, Text('▶ Старт'), state=[None, States.my_categories])
+    dp.register_message_handler(start_button, Text('▶ Старт'), state=[None, States.my_categories, States.category_menu])
 
 
 async def stop_button(call: CallbackQuery, state: FSMContext):
@@ -66,7 +66,7 @@ async def stop_button(call: CallbackQuery, state: FSMContext):
 
 
 def register_stop_button(dp: Dispatcher):
-    dp.register_callback_query_handler(stop_button, text='stop', state=[None, States.my_categories])
+    dp.register_callback_query_handler(stop_button, text='stop', state=[None, States.my_categories, States.category_menu])
 
 
 async def no_add_button(call: CallbackQuery):

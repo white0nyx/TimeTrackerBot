@@ -26,7 +26,8 @@ async def statistic_button(message: Message):
 
 
 def register_statistic_button(dp: Dispatcher):
-    dp.register_message_handler(statistic_button, Text('📊 Статистика'), state=[None, States.my_categories])
+    dp.register_message_handler(statistic_button, Text('📊 Статистика'),
+                                state=[None, States.my_categories, States.category_menu])
 
 
 def register_all_statistic(dp):
