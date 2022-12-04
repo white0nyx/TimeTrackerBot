@@ -7,7 +7,7 @@ from aiogram.types import Message, CallbackQuery
 
 from tgbot.keyboards.inline import stop_timer_button, generate_category_keyboard, yes_no_keyboard
 from tgbot.misc.states import States
-from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data
+from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
 from tgbot.misc.work_with_text import get_the_time_in_seconds
 
 
@@ -16,6 +16,9 @@ async def start_button(message: Message, state: FSMContext):
     await message.answer('Время пошло!', reply_markup=stop_timer_button)
 
     start_time = message.date
+
+    user_id = message.from_user.id
+    fill_all_categories_past_date(user_id)
 
     async with state.proxy() as data:
         data['last_start'] = start_time

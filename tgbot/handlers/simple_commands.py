@@ -9,7 +9,7 @@ from aiogram.types import Message
 
 from tgbot.keyboards.reply import main_keyboard
 from tgbot.misc.states import States
-from tgbot.misc.work_with_json import get_user_from_json_db
+from tgbot.misc.work_with_json import get_user_from_json_db, fill_all_categories_past_date
 
 
 async def start_command(message: Message):
@@ -35,18 +35,19 @@ async def start_command(message: Message):
         db.seek(0)
         json.dump(users, db, indent=4, ensure_ascii=False)
 
+    fill_all_categories_past_date(user_id)
+
 
 async def help_command(message: Message):
     """Обработка команды /help"""
     await message.answer('Когда-нибудь я напишу здесь сообщение, которое будет помогать пользователям')
 
 
-async def my_data_command(message: Message, state: FSMContext):
+async def my_data_command(message: Message):
     """Вывод всех сохранных данных из стейта"""
-    async with state.proxy() as data:
-        user_id = message.from_user.id
-        user_info = str(get_user_from_json_db(user_id))
-        await message.answer(f"""<code>{user_info.replace("'", '"')}</code>""")
+    user_id = message.from_user.id
+    user_info = str(get_user_from_json_db(user_id))
+    await message.answer(f"""<code>{user_info.replace("'", '"')}</code>""")
 
 
 def register_all_simple_commands(dp: Dispatcher):

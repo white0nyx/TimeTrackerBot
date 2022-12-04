@@ -4,13 +4,14 @@ from aiogram.dispatcher.filters import Text
 from aiogram.types import Message
 
 from tgbot.misc.states import States
-from tgbot.misc.work_with_json import get_user_from_json_db
+from tgbot.misc.work_with_json import get_user_from_json_db, fill_all_categories_past_date
 from tgbot.misc.work_with_text import get_statistic
 
 
-async def statistic_button(message: Message, state: FSMContext):
+async def statistic_button(message: Message):
     user_id = message.from_user.id
 
+    fill_all_categories_past_date(user_id)
     user = get_user_from_json_db(user_id)
 
     if not user.get('categories'):

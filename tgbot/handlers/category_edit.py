@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery, Message
 from tgbot.keyboards.inline import category_buttons, yes_no_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_date import get_day_of_week
-from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data
+from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
 from tgbot.misc.work_with_text import get_category_info_message
 
 
@@ -18,7 +18,9 @@ async def category_inline_button(call: CallbackQuery, state: FSMContext):
 
     user_id = call.from_user.id
     user = get_user_from_json_db(user_id)
+
     categories = user.get('categories')
+    fill_all_categories_past_date(user_id)
 
     text = get_category_info_message(callback_data, categories)
     await call.message.delete()

@@ -8,7 +8,7 @@ from aiogram.types import Message, CallbackQuery
 from tgbot.keyboards.inline import yes_no_keyboard, generate_category_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
-from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data
+from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
 from tgbot.misc.work_with_text import get_the_time_in_seconds
 
 
@@ -19,7 +19,7 @@ async def my_categories_button(message: Message, state: FSMContext):
 
     user = get_user_from_json_db(user_id)
     categories = user.get('categories')
-
+    fill_all_categories_past_date(user_id)
     if not categories:
         await message.answer('У вас пока нет ни одной добавленной категории.\n\n'
                              'Чтобы добавить категорию воспользуйтесь кнопкой ниже.',
