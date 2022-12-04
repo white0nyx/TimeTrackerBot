@@ -48,25 +48,18 @@ def get_word_end_vp(minutes: int):
             '6': 'минут',
             '7': 'минут',
             '8': 'минут',
-            '9': 'минут',
-            '11': 'минут',
-            '12': 'минут',
-            '13': 'минут',
-            '14': 'минут'
-            }
+            '9': 'минут'}
 
     str_number = str(minutes)
-    last_number = str_number[-1]
-    if ends.get(str_number) is not None:
-        return ends.get(str_number)
+
+    if str_number[-2:] in ('11', '12', '13', '14'):
+        return 'минут'
 
     else:
-        return ends.get(last_number)
+        return ends.get(str_number[-1])
 
 
 def get_word_end_rp(minutes: int):
-    last_number = str(minutes)[-1]
-
     ends = {'0': 'минут',
             '1': 'минуты',
             '2': 'минут',
@@ -76,8 +69,12 @@ def get_word_end_rp(minutes: int):
             '6': 'минут',
             '7': 'минут',
             '8': 'минут',
-            '9': 'минут',
-            '11': 'минут',
-            '12': 'минут'}
+            '9': 'минут'}
 
-    return ends[last_number]
+    str_number = str(minutes)
+
+    if str_number[-2:] in ('11', '12', '13', '14'):
+        return 'минут'
+
+    else:
+        return ends.get(str_number[-1])
