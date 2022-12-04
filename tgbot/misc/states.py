@@ -24,6 +24,7 @@ class States(StatesGroup):
 
     # Ожидание минут для вычитания
     wait_sub_minutes = State()
+    confirm_sub_minutes = State()
 
     # Ожидание нового названия
     wait_new_title = State()

@@ -25,7 +25,6 @@ def get_statistic(categories):
 
 
 def get_category_info_message(category_n: str, categories: list):
-
     category = {}
     for category in categories:
         if category['callback_data'] == category_n:
@@ -37,3 +36,48 @@ def get_category_info_message(category_n: str, categories: list):
            f'Всего потрачено времени: {category_all_time}'
 
     return text
+
+
+def get_word_end_vp(minutes: int):
+    ends = {'0': 'минут',
+            '1': 'минуту',
+            '2': 'минуты',
+            '3': 'минуты',
+            '4': 'минуты',
+            '5': 'минут',
+            '6': 'минут',
+            '7': 'минут',
+            '8': 'минут',
+            '9': 'минут',
+            '11': 'минут',
+            '12': 'минут',
+            '13': 'минут',
+            '14': 'минут'
+            }
+
+    str_number = str(minutes)
+    last_number = str_number[-1]
+    if ends.get(str_number) is not None:
+        return ends.get(str_number)
+
+    else:
+        return ends.get(last_number)
+
+
+def get_word_end_rp(minutes: int):
+    last_number = str(minutes)[-1]
+
+    ends = {'0': 'минут',
+            '1': 'минуты',
+            '2': 'минут',
+            '3': 'минут',
+            '4': 'минут',
+            '5': 'минут',
+            '6': 'минут',
+            '7': 'минут',
+            '8': 'минут',
+            '9': 'минут',
+            '11': 'минут',
+            '12': 'минут'}
+
+    return ends[last_number]

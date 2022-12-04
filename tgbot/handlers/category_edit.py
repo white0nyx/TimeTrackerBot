@@ -8,7 +8,7 @@ from tgbot.keyboards.inline import category_buttons, yes_no_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_date import get_day_of_week
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
-from tgbot.misc.work_with_text import get_category_info_message
+from tgbot.misc.work_with_text import get_category_info_message, get_word_end_vp, get_word_end_rp
 
 
 async def category_inline_button(call: CallbackQuery, state: FSMContext):
@@ -66,30 +66,49 @@ def register_edit_category(dp: Dispatcher):
 
 async def confirm_adding_time(message: Message, state: FSMContext):
     time_in_minutes = int(message.text)
+    if await state.get_state() == States.wait_add_minutes.state:
+        action = 'добавить'
+        await States.confirm_add_minutes.set()
+
+    else:
+        action = 'вычесть'
+        await States.confirm_sub_minutes.set()
 
     async with state.proxy() as data:
         data['time_in_minutes'] = time_in_minutes
 
-    await message.answer(f'Вы хотите добавить {time_in_minutes} минут?', reply_markup=yes_no_keyboard)
-    await States.confirm_add_minutes.set()
+    minutes = get_word_end_vp(time_in_minutes)
+
+    await message.answer(f'Вы хотите {action} {time_in_minutes} {minutes}?', reply_markup=yes_no_keyboard)
 
 
 def register_confirm_adding_time(dp: Dispatcher):
-    dp.register_message_handler(confirm_adding_time, state=[States.wait_add_minutes])
+    dp.register_message_handler(confirm_adding_time, state=[States.wait_add_minutes, States.wait_sub_minutes])
 
 
 async def add_time(call: CallbackQuery, state: FSMContext):
     if call.data == 'no':
 
+        print(await state.get_state())
+        if await state.get_state() == States.confirm_add_minutes.state:
+            action = 'добавление'
+            state_again = States.wait_add_minutes
+
+        else:
+            action = 'вычитание'
+            state_again = States.wait_sub_minutes
+
         async with state.proxy() as data:
             time_in_minutes = data.get('time_in_minutes')
-
+            minutes_text = get_word_end_rp(time_in_minutes)
         await call.message.delete()
-        await call.message.answer(f'Вы отменили добавление {time_in_minutes} минут!'
+        await call.message.answer(f'Вы отменили {action} {time_in_minutes} {minutes_text}! '
                                   f'Введите новое число или нажмите отмену.')
-        await States.wait_add_minutes.set()
+        await state_again.set()
 
     else:
+
+        action = 'добавлено' if await state.get_state() == States.confirm_add_minutes.state else 'вычтено'
 
         async with state.proxy() as data:
             category_title = data.get('changing_category')
@@ -101,13 +120,19 @@ async def add_time(call: CallbackQuery, state: FSMContext):
         for category in user['categories']:
             if category['name'] == category_title:
                 today = get_day_of_week(call)
-                category['seconds'] += time_in_minutes * 60
-                category[today] += time_in_minutes * 60
 
-                date_now = str(datetime.now()).split()[0]
-                if category['operations'].get(date_now) is None:
-                    category['operations'][date_now] = time_in_minutes * 60
+                if await state.get_state() == States.confirm_add_minutes.state:
+                    category['seconds'] += time_in_minutes * 60
+                    category[today] += time_in_minutes * 60
+
+                    date_now = str(datetime.now()).split()[0]
+                    category['operations'][date_now] += time_in_minutes * 60
+
                 else:
+                    category['seconds'] -= time_in_minutes * 60
+                    category[today] -= time_in_minutes * 60
+
+                    date_now = str(datetime.now()).split()[0]
                     category['operations'][date_now] += time_in_minutes * 60
 
                 break
@@ -115,12 +140,12 @@ async def add_time(call: CallbackQuery, state: FSMContext):
         update_user_data(user_id, user)
 
         await call.message.delete()
-        await call.message.answer('Время добавлено!')
+        await call.message.answer(f'Время {action}!')
         await state.reset_state(with_data=True)
 
 
 def register_add_time(dp: Dispatcher):
-    dp.register_callback_query_handler(add_time, state=[States.confirm_add_minutes])
+    dp.register_callback_query_handler(add_time, state=[States.confirm_add_minutes, States.confirm_sub_minutes])
 
 
 def register_all_category_edit(dp):
