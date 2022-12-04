@@ -31,4 +31,4 @@ class States(StatesGroup):
     confirm_new_title = State()
 
     # Подтверждение удаления категории
-    delete_category_confirm = State()
+    confirm_delete_category = State()

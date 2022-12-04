@@ -57,7 +57,7 @@ async def edit_category(call: CallbackQuery, state: FSMContext):
     elif call.data == 'delete_category':
         await call.message.answer(f'Вы уверены, что хотите удалить категорию {category_title}?',
                                   reply_markup=yes_no_keyboard)
-        await States.delete_category_confirm.set()
+        await States.confirm_delete_category.set()
 
 
 def register_edit_category(dp: Dispatcher):
@@ -164,7 +164,6 @@ def register_ask_category_title(dp: Dispatcher):
 
 
 async def confirm_new_category_title(call: CallbackQuery, state: FSMContext):
-
     await call.answer(cache_time=10)
 
     if call.data == 'no':
@@ -197,6 +196,37 @@ def register_confirm_new_category_title(dp: Dispatcher):
     dp.register_callback_query_handler(confirm_new_category_title, state=States.confirm_new_title)
 
 
+async def confirm_delete_category(call: CallbackQuery, state: FSMContext):
+    await call.answer(cache_time=10)
+
+    if call.data == 'no':
+        await call.message.answer('Удаление категории отменено')
+        await call.message.delete()
+        await state.reset_state(with_data=True)
+
+    else:
+        user_id = call.from_user.id
+        user = get_user_from_json_db(user_id)
+        categories = user['categories']
+
+        async with state.proxy() as data:
+            category_name = data['changing_category']
+
+        for index, category in enumerate(categories):
+            if category['name'] == category_name:
+                del categories[index]
+                break
+
+        update_user_data(user_id, user)
+
+        await call.message.answer(f'Категория {category_name} была удалена!')
+        await state.reset_state(with_data=True)
+
+
+def register_confirm_delete_category(dp: Dispatcher):
+    dp.register_callback_query_handler(confirm_delete_category, state=States.confirm_delete_category)
+
+
 def register_all_category_edit(dp):
     register_category_inline_button(dp)
     register_edit_category(dp)
@@ -204,3 +234,4 @@ def register_all_category_edit(dp):
     register_change_time(dp)
     register_ask_category_title(dp)
     register_confirm_new_category_title(dp)
+    register_confirm_delete_category(dp)
