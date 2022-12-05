@@ -9,14 +9,16 @@ from tgbot.keyboards.inline import category_buttons, yes_no_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_date import get_day_of_week
-from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
-from tgbot.misc.work_with_text import get_category_info_message, get_word_end_vp, get_word_end_rp
+from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
+    possible_add_time, possible_sub_time
+from tgbot.misc.work_with_text import get_category_info_message, get_word_end_vp, get_word_end_rp, \
+    convert_to_preferred_format
 
 
-async def category_inline_button(call: CallbackQuery, state: FSMContext):
+async def category_inline_button(call: CallbackQuery):
     """Обработка нажатия на Inline-кнопку категории в состоянии my_categories"""
     callback_data = call.data
-    await call.answer(cache_time=5)
+    await call.answer(cache_time=10)
 
     user_id = call.from_user.id
     user = get_user_from_json_db(user_id)
@@ -36,7 +38,7 @@ def register_category_inline_button(dp: Dispatcher):
 
 
 async def edit_category(call: CallbackQuery, state: FSMContext):
-    await call.answer(cache_time=3)
+    await call.answer(cache_time=10)
     category_title = call.message.text.split('\n')[0]
 
     async with state.proxy() as data:
@@ -70,13 +72,53 @@ def register_edit_category(dp: Dispatcher):
 
 
 async def confirm_changing_time(message: Message, state: FSMContext):
+    time_in_minutes = message.text
+    user_id = message.from_user.id
+
+    if not time_in_minutes.isdigit() or int(message.text) <= 0 or int(message.text) > 1440:
+        await message.answer('⚠ Данные введены некорректно!\n\n'
+                             'Необходимо отправить целое число, которое находится в промежутке от 1 до 1440\n\n'
+                             'Пожалуйста, повторите ввод', reply_markup=cancel_button)
+        return
+
+    async with state.proxy() as data:
+        category_title = data['changing_category']
+
     time_in_minutes = int(message.text)
+
     if await state.get_state() == States.wait_add_minutes.state:
         action = 'добавить'
+
+        check_possible_add_time = possible_add_time(user_id, time_in_minutes, category_title)
+        is_possible_add_time = check_possible_add_time.get('is_possible_add_time')
+        seconds_today = check_possible_add_time.get('seconds_today')
+
+        if not is_possible_add_time:
+
+            await message.answer('⚠ Данные введены некорректно!\n\n'
+                                 f'Вы не можете добавить такое количество минут, '
+                                 f'поскольку иначе получится, что за эти сутки вы '
+                                 f'уделили этой категории более 24 часов\n\n'
+                                 f'Потрачено времени сегодня: {convert_to_preferred_format(seconds_today)}', reply_markup=cancel_button)
+            return
+
         await States.confirm_add_minutes.set()
 
     else:
         action = 'вычесть'
+
+        check_possible_sub_time = possible_sub_time(user_id, time_in_minutes, category_title)
+        is_possible_sub_time = check_possible_sub_time.get('is_possible_sub_time')
+        seconds_today = check_possible_sub_time.get('seconds_today')
+
+        if not is_possible_sub_time:
+            await message.answer(f'⚠ Данные введены некорректно!\n\n'
+                                 f'Вы не можете вычесть такое количество минут, '
+                                 f'поскольку сегодня ещё не потратили столько времени на неё\n\n'
+                                 f'Потрачено времени сегодня: {convert_to_preferred_format(seconds_today)}',
+                                 reply_markup=cancel_button)
+            return
+
         await States.confirm_sub_minutes.set()
 
     async with state.proxy() as data:
@@ -137,7 +179,7 @@ async def change_time(call: CallbackQuery, state: FSMContext):
                     category[today] -= time_in_minutes * 60
 
                     date_now = str(datetime.now()).split()[0]
-                    category['operations'][date_now] += time_in_minutes * 60
+                    category['operations'][date_now] -= time_in_minutes * 60
 
                 break
 
@@ -154,6 +196,12 @@ def register_change_time(dp: Dispatcher):
 
 async def ask_category_title(message: Message, state: FSMContext):
     new_title = message.text
+
+    if len(new_title) > 32:
+        await message.answer('⚠ Слишком длинное название\n\n'
+                             'Вы можете указать название длиной до 32 символов\n\n'
+                             'Пожалуйста, повторите ввод', reply_markup=cancel_button)
+        return
 
     async with state.proxy() as data:
         data['new_category_title'] = new_title
