@@ -17,7 +17,8 @@ async def cancel_button(message: Message, state: FSMContext):
 
 def register_cancel_button(dp: Dispatcher):
     """Регистрация обработчика кнопки отмена"""
-    dp.register_message_handler(cancel_button, Text('↩ Отмена'), state=[States.add_new_category_name,
+    dp.register_message_handler(cancel_button, Text('↩ Отмена'), state=[None,
+                                                                        States.add_new_category_name,
                                                                         States.add_new_category_based_minutes,
                                                                         States.wait_add_minutes,
                                                                         States.wait_sub_minutes,

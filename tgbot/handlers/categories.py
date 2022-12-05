@@ -12,7 +12,7 @@ from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, f
 from tgbot.misc.work_with_text import get_the_time_in_seconds
 
 
-async def my_categories_button(message: Message, state: FSMContext):
+async def my_categories_button(message: Message):
     """Обработка нажатия на кнопку КАТЕГОРИИ"""
 
     user_id = str(message.from_user.id)
@@ -40,7 +40,7 @@ async def add_new_category(call: CallbackQuery):
     """Обработка кнопки НОВАЯ КАТЕГОРИЯ"""
     await call.answer(cache_time=60)
     await States.add_new_category_name.set()
-    await call.message.answer('Введите название категории:', reply_markup=cancel_button)
+    await call.message.answer('Введите название категории', reply_markup=cancel_button)
 
 
 def register_add_new_category(dp: Dispatcher):
@@ -53,6 +53,12 @@ def register_add_new_category(dp: Dispatcher):
 async def save_name_new_category(message: Message, state: FSMContext):
     """Сохранение названия категории и запрос потраченного времени"""
     category_name = message.text
+
+    if len(category_name) > 32:
+        await message.answer('⚠ Слишком длинное название\n\n'
+                             'Вы можете указать название длиной до 32 символов\n\n'
+                             'Пожалуйста, повторите ввод', reply_markup=cancel_button)
+        return
 
     async with state.proxy() as data:
         data['suspect_category'] = {}
@@ -70,6 +76,12 @@ def register_save_name_new_category(dp: Dispatcher):
 async def save_based_minutes_new_category(message: Message, state: FSMContext):
     """Сохранение количества потраченных минут и запрос подтверждения данных"""
     minutes = message.text
+
+    if not minutes.isdigit():
+        await message.answer('⚠ Данные введены некорректно!\n\n'
+                             'Необходимо отправить целое число, которое больше или равно 0\n\n'
+                             'Пожалуйста, повторите ввод', reply_markup=cancel_button)
+        return
 
     async with state.proxy() as data:
         data['suspect_category']['based_minutes'] = int(minutes)
