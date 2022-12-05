@@ -9,7 +9,7 @@ from tgbot.keyboards.inline import yes_no_keyboard, generate_category_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
-from tgbot.misc.work_with_text import get_the_time_in_seconds
+from tgbot.misc.work_with_text import get_the_time_in_seconds, is_valid_time, convert_to_preferred_format
 
 
 async def my_categories_button(message: Message):
@@ -33,7 +33,9 @@ async def my_categories_button(message: Message):
 
 def register_my_categories_button(dp: Dispatcher):
     """Регистрация обработчика кнопки КАТЕГОРИИ"""
-    dp.register_message_handler(my_categories_button, Text('📓 Мои категории'), state=[None, States.my_categories])
+    dp.register_message_handler(my_categories_button,
+                                Text('📓 Мои категории'),
+                                state=[None, States.my_categories, States.category_menu])
 
 
 async def add_new_category(call: CallbackQuery):
@@ -64,7 +66,8 @@ async def save_name_new_category(message: Message, state: FSMContext):
         data['suspect_category'] = {}
         data['suspect_category']['name'] = category_name
 
-    await message.answer(f'Укажите количество потраченных минут на неё', reply_markup=cancel_button)
+    await message.answer(f'Укажите количество потраченного времени на эту категорию в формате чч:мм:сс\n\n'
+                         f'Например: 01:30:45 или 2:3:45', reply_markup=cancel_button)
     await States.add_new_category_based_minutes.set()
 
 
@@ -75,17 +78,16 @@ def register_save_name_new_category(dp: Dispatcher):
 
 async def save_based_minutes_new_category(message: Message, state: FSMContext):
     """Сохранение количества потраченных минут и запрос подтверждения данных"""
-    minutes = message.text
+    str_time = message.text
 
-    if not minutes.isdigit():
-        await message.answer('⚠ Данные введены некорректно!\n\n'
-                             'Необходимо отправить целое число, которое больше или равно 0\n\n'
-                             'Пожалуйста, повторите ввод', reply_markup=cancel_button)
+    if is_valid_time(str_time) is not True:
+        await message.answer(text=is_valid_time(str_time), reply_markup=cancel_button)
         return
 
+    seconds = get_the_time_in_seconds(str_time)
     async with state.proxy() as data:
-        data['suspect_category']['based_minutes'] = int(minutes)
-        data['suspect_category']['seconds'] = int(minutes) * 60
+        data['suspect_category']['based_seconds'] = int(seconds)
+        data['suspect_category']['seconds'] = int(seconds)
         data['suspect_category']['monday'] = 0
         data['suspect_category']['tuesday'] = 0
         data['suspect_category']['wednesday'] = 0
@@ -97,11 +99,12 @@ async def save_based_minutes_new_category(message: Message, state: FSMContext):
 
     async with state.proxy() as data:
         category_name = data['suspect_category']['name']
-        category_minutes = data['suspect_category']['based_minutes']
+        category_seconds = data['suspect_category']['based_seconds']
+        category_time = convert_to_preferred_format(category_seconds)
 
     await message.answer(f'Подтвердите введённые данные: \n\n'
                          f'Категория: {category_name}\n'
-                         f'Потрачено минут: {category_minutes}', reply_markup=yes_no_keyboard)
+                         f'Потрачено времени: {category_time}', reply_markup=yes_no_keyboard)
 
     await States.confirm_data.set()
 
@@ -135,7 +138,7 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
             if data.get('last_time') is not None:
                 new_time = get_the_time_in_seconds(data.get('last_time'))
 
-                old_time = int(user['categories'][-1]['based_minutes']) * 60
+                old_time = int(user['categories'][-1]['based_seconds'])
 
                 user['categories'][-1]['seconds'] = old_time + new_time
 
