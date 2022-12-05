@@ -9,7 +9,7 @@ class States(StatesGroup):
     # Добавление новой категории
     my_categories = State()
     add_new_category_name = State()
-    add_new_category_based_minutes = State()
+    add_new_category_based_seconds = State()
     confirm_data = State()
 
     # Добавление времени к категории
@@ -18,15 +18,15 @@ class States(StatesGroup):
     # Меню категории
     category_menu = State()
 
-    # Ожидание минут для добавления
-    wait_add_minutes = State()
-    confirm_add_minutes = State()
+    # Ожидание и подтверждение времени для добавления
+    wait_add_time = State()
+    confirm_add_time = State()
 
-    # Ожидание минут для вычитания
-    wait_sub_minutes = State()
-    confirm_sub_minutes = State()
+    # Ожидание и подтверждение времени для вычитания
+    wait_sub_time = State()
+    confirm_sub_time = State()
 
-    # Ожидание нового названия
+    # Ожидание и подтверждение нового названия
     wait_new_title = State()
     confirm_new_title = State()
 

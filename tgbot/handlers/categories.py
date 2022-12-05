@@ -67,8 +67,8 @@ async def save_name_new_category(message: Message, state: FSMContext):
         data['suspect_category']['name'] = category_name
 
     await message.answer(f'Укажите количество потраченного времени на эту категорию в формате чч:мм:сс\n\n'
-                         f'Например: 01:30:45 или 2:3:45', reply_markup=cancel_button)
-    await States.add_new_category_based_minutes.set()
+                         f'Например: 01:20:03 или 1:20:3', reply_markup=cancel_button)
+    await States.add_new_category_based_seconds.set()
 
 
 def register_save_name_new_category(dp: Dispatcher):
@@ -111,7 +111,7 @@ async def save_based_minutes_new_category(message: Message, state: FSMContext):
 
 def register_save_minutes_new_category(dp: Dispatcher):
     """Регистрация обработчика сохранения потраченных минут"""
-    dp.register_message_handler(save_based_minutes_new_category, state=[States.add_new_category_based_minutes])
+    dp.register_message_handler(save_based_minutes_new_category, state=[States.add_new_category_based_seconds])
 
 
 async def confirm_data(call: CallbackQuery, state: FSMContext):

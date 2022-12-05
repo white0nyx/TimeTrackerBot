@@ -19,8 +19,8 @@ def register_cancel_button(dp: Dispatcher):
     """Регистрация обработчика кнопки отмена"""
     dp.register_message_handler(cancel_button, Text('↩ Отмена'), state=[None,
                                                                         States.add_new_category_name,
-                                                                        States.add_new_category_based_minutes,
-                                                                        States.wait_add_minutes,
-                                                                        States.wait_sub_minutes,
+                                                                        States.add_new_category_based_seconds,
+                                                                        States.wait_add_time,
+                                                                        States.wait_sub_time,
                                                                         States.wait_new_title,
                                                                         States.confirm_delete_category])

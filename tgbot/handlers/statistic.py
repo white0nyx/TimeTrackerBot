@@ -1,5 +1,4 @@
 from aiogram import Dispatcher
-from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.types import Message
 

@@ -89,7 +89,7 @@ def fill_all_categories_past_date(user_id):
         fill_past_date(user_id, callback_data)
 
 
-def possible_add_time(user_id, time_in_minutes, category_name):
+def possible_add_time(user_id, time_in_seconds, category_name):
     today = str(datetime.now()).split()[0]
     user = get_user_from_json_db(user_id)
 
@@ -97,11 +97,11 @@ def possible_add_time(user_id, time_in_minutes, category_name):
 
     for category in categories:
         if category['name'] == category_name:
-            return {'is_possible_add_time': category['operations'][today] + time_in_minutes * 60 <= 86_400,
+            return {'is_possible_add_time': category['operations'][today] + time_in_seconds <= 86_400,
                     'seconds_today': category['operations'][today]}
 
 
-def possible_sub_time(user_id, time_in_minutes, category_name):
+def possible_sub_time(user_id, time_in_seconds, category_name):
     today = str(datetime.now()).split()[0]
     user = get_user_from_json_db(user_id)
 
@@ -109,5 +109,5 @@ def possible_sub_time(user_id, time_in_minutes, category_name):
 
     for category in categories:
         if category['name'] == category_name:
-            return {'is_possible_sub_time': category['operations'][today] - time_in_minutes * 60 >= 0,
+            return {'is_possible_sub_time': category['operations'][today] - time_in_seconds >= 0,
                     'seconds_today': category['operations'][today]}

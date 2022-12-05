@@ -1,9 +1,7 @@
 # Обработчики простых команд
-import datetime
 import json
 
 from aiogram import Dispatcher
-from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 from aiogram.types import Message
 

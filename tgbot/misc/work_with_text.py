@@ -1,4 +1,4 @@
-def is_valid_time(str_time):
+def is_valid_time(str_time, for_edit_time=False):
     if str_time.count(':') != 2 or not str_time.replace(':', '').isdigit():
         return '⚠ Данные введены некорректно!\n\n' \
                'Не соблюдён формат чч:мм:сс\n\n' \
@@ -11,17 +11,26 @@ def is_valid_time(str_time):
                'Количество часов должно быть целым неотрицательным числом\n\n' \
                'Пожалуйста, повторите ввод'
 
-    if not m.isdigit() or 0 > int(m) or int(m) > 59:
+    if for_edit_time and int(h) > 24:
+        return '⚠ Данные введены некорректно!\n\n' \
+               'Количество часов не должно превышать 24 часа'
+
+    if not m.isdigit() or int(m) > 59:
         return '⚠ Данные введены некорректно!\n\n' \
                'Количество минут должно быть целым числом, ' \
                'которое не может превышать 59 или быть отрицательным\n\n' \
                'Пожалуйста, повторите ввод'
 
-    if not s.isdigit() or 0 > int(s) or int(s) > 59:
+    if not s.isdigit() or int(s) > 59:
         return '⚠ Данные введены некорректно!\n\n' \
                'Количество секунд должно быть целым числом, ' \
                'которое не может превышать 59 или быть отрицательным\n\n' \
                'Пожалуйста, повторите ввод'
+
+    time_in_seconds = int(h) * 3600 + int(m) * 60 + int(s)
+    if for_edit_time and time_in_seconds > 86_400:
+        return '⚠ Данные введены некорректно!\n\n' \
+               'Указываемое время не должно превышать 24 часа'
 
     return True
 

@@ -11,8 +11,8 @@ from tgbot.misc.states import States
 from tgbot.misc.work_with_date import get_day_of_week
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
     possible_add_time, possible_sub_time
-from tgbot.misc.work_with_text import get_category_info_message, get_word_end_vp, get_word_end_rp, \
-    convert_to_preferred_format
+from tgbot.misc.work_with_text import get_category_info_message, convert_to_preferred_format, is_valid_time,\
+    get_the_time_in_seconds
 
 
 async def category_inline_button(call: CallbackQuery):
@@ -46,18 +46,20 @@ async def edit_category(call: CallbackQuery, state: FSMContext):
 
     if call.data == 'add_time':
         await call.message.answer(
-            f'Введите время в минутах, которое вы хотите добавить к категории {category_title}:',
+            f'Введите время в формате чч:мм:сс, которое вы хотите добавить к категории {category_title}\n\n'
+            f'Например: 01:20:03 или 1:20:3',
             reply_markup=cancel_button)
-        await States.wait_add_minutes.set()
+        await States.wait_add_time.set()
 
     elif call.data == 'subtract_time':
         await call.message.answer(
-            f'Введите время в минутах, которое вы хотите вычесть из категории {category_title}:',
+            f'Введите время в формате чч:мм:сс, которое вы хотите вычесть из категории {category_title}\n\n'
+            f'Например: 01:20:03 или 1:20:3',
             reply_markup=cancel_button)
-        await States.wait_sub_minutes.set()
+        await States.wait_sub_time.set()
 
     elif call.data == 'change_title':
-        await call.message.answer(f'Введите новое название для категории {category_title}:',
+        await call.message.answer(f'Введите новое название для категории {category_title}',
                                   reply_markup=cancel_button)
         await States.wait_new_title.set()
 
@@ -72,93 +74,90 @@ def register_edit_category(dp: Dispatcher):
 
 
 async def confirm_changing_time(message: Message, state: FSMContext):
-    time_in_minutes = message.text
-    user_id = message.from_user.id
+    str_time = message.text
 
-    if not time_in_minutes.isdigit() or int(message.text) <= 0 or int(message.text) > 1440:
-        await message.answer('⚠ Данные введены некорректно!\n\n'
-                             'Необходимо отправить целое число, которое находится в промежутке от 1 до 1440\n\n'
-                             'Пожалуйста, повторите ввод', reply_markup=cancel_button)
+    if is_valid_time(str_time, for_edit_time=True) is not True:
+        await message.answer(text=is_valid_time(str_time, for_edit_time=True), reply_markup=cancel_button)
         return
+
+    user_id = message.from_user.id
 
     async with state.proxy() as data:
         category_title = data['changing_category']
 
-    time_in_minutes = int(message.text)
+    time_in_seconds = get_the_time_in_seconds(str_time)
 
-    if await state.get_state() == States.wait_add_minutes.state:
+    if await state.get_state() == States.wait_add_time.state:
         action = 'добавить'
 
-        check_possible_add_time = possible_add_time(user_id, time_in_minutes, category_title)
+        check_possible_add_time = possible_add_time(user_id, time_in_seconds, category_title)
         is_possible_add_time = check_possible_add_time.get('is_possible_add_time')
         seconds_today = check_possible_add_time.get('seconds_today')
 
         if not is_possible_add_time:
 
             await message.answer('⚠ Данные введены некорректно!\n\n'
-                                 f'Вы не можете добавить такое количество минут, '
+                                 f'Вы не можете добавить такое количество времени, '
                                  f'поскольку иначе получится, что за эти сутки вы '
                                  f'уделили этой категории более 24 часов\n\n'
-                                 f'Потрачено времени сегодня: {convert_to_preferred_format(seconds_today)}', reply_markup=cancel_button)
+                                 f'Потрачено времени сегодня: {convert_to_preferred_format(seconds_today)}\n'
+                                 f'Ещё можно добавить сегодня: {convert_to_preferred_format(86_400 - seconds_today)}', reply_markup=cancel_button)
             return
 
-        await States.confirm_add_minutes.set()
+        await States.confirm_add_time.set()
 
     else:
         action = 'вычесть'
 
-        check_possible_sub_time = possible_sub_time(user_id, time_in_minutes, category_title)
+        check_possible_sub_time = possible_sub_time(user_id, time_in_seconds, category_title)
         is_possible_sub_time = check_possible_sub_time.get('is_possible_sub_time')
         seconds_today = check_possible_sub_time.get('seconds_today')
 
         if not is_possible_sub_time:
             await message.answer(f'⚠ Данные введены некорректно!\n\n'
-                                 f'Вы не можете вычесть такое количество минут, '
+                                 f'Вы не можете вычесть такое количество времени из этой категории, '
                                  f'поскольку сегодня ещё не потратили столько времени на неё\n\n'
                                  f'Потрачено времени сегодня: {convert_to_preferred_format(seconds_today)}',
                                  reply_markup=cancel_button)
             return
 
-        await States.confirm_sub_minutes.set()
+        await States.confirm_sub_time.set()
 
     async with state.proxy() as data:
-        data['time_in_minutes'] = time_in_minutes
+        data['time_in_seconds'] = time_in_seconds
 
-    minutes = get_word_end_vp(time_in_minutes)
-
-    await message.answer(f'Вы хотите {action} {time_in_minutes} {minutes}?', reply_markup=yes_no_keyboard)
+    await message.answer(f'Вы хотите {action} {convert_to_preferred_format(time_in_seconds)}?', reply_markup=yes_no_keyboard)
 
 
 def register_confirm_changing_time(dp: Dispatcher):
-    dp.register_message_handler(confirm_changing_time, state=[States.wait_add_minutes, States.wait_sub_minutes])
+    dp.register_message_handler(confirm_changing_time, state=[States.wait_add_time, States.wait_sub_time])
 
 
 async def change_time(call: CallbackQuery, state: FSMContext):
     if call.data == 'no':
 
-        if await state.get_state() == States.confirm_add_minutes.state:
+        if await state.get_state() == States.confirm_add_time.state:
             action = 'добавление'
-            state_again = States.wait_add_minutes
+            state_again = States.wait_add_time
 
         else:
             action = 'вычитание'
-            state_again = States.wait_sub_minutes
+            state_again = States.wait_sub_time
 
         async with state.proxy() as data:
-            time_in_minutes = data.get('time_in_minutes')
-            minutes_text = get_word_end_rp(time_in_minutes)
+            time_in_seconds = data.get('time_in_seconds')
         await call.message.delete()
-        await call.message.answer(f'Вы отменили {action} {time_in_minutes} {minutes_text}! '
+        await call.message.answer(f'Вы отменили {action} {convert_to_preferred_format(time_in_seconds)}! '
                                   f'Введите новое число или нажмите отмену.', reply_markup=cancel_button)
         await state_again.set()
 
     else:
 
-        action = 'добавлено' if await state.get_state() == States.confirm_add_minutes.state else 'вычтено'
+        action = 'добавлено' if await state.get_state() == States.confirm_add_time.state else 'вычтено'
 
         async with state.proxy() as data:
             category_title = data.get('changing_category')
-            time_in_minutes = data.get('time_in_minutes')
+            time_in_seconds = data.get('time_in_seconds')
 
         user_id = call.from_user.id
         user = get_user_from_json_db(user_id)
@@ -167,19 +166,19 @@ async def change_time(call: CallbackQuery, state: FSMContext):
             if category['name'] == category_title:
                 today = get_day_of_week(call)
 
-                if await state.get_state() == States.confirm_add_minutes.state:
-                    category['seconds'] += time_in_minutes * 60
-                    category[today] += time_in_minutes * 60
+                if await state.get_state() == States.confirm_add_time.state:
+                    category['seconds'] += time_in_seconds
+                    category[today] += time_in_seconds
 
                     date_now = str(datetime.now()).split()[0]
-                    category['operations'][date_now] += time_in_minutes * 60
+                    category['operations'][date_now] += time_in_seconds
 
                 else:
-                    category['seconds'] -= time_in_minutes * 60
-                    category[today] -= time_in_minutes * 60
+                    category['seconds'] -= time_in_seconds
+                    category[today] -= time_in_seconds
 
                     date_now = str(datetime.now()).split()[0]
-                    category['operations'][date_now] -= time_in_minutes * 60
+                    category['operations'][date_now] -= time_in_seconds
 
                 break
 
@@ -191,7 +190,7 @@ async def change_time(call: CallbackQuery, state: FSMContext):
 
 
 def register_change_time(dp: Dispatcher):
-    dp.register_callback_query_handler(change_time, state=[States.confirm_add_minutes, States.confirm_sub_minutes])
+    dp.register_callback_query_handler(change_time, state=[States.confirm_add_time, States.confirm_sub_time])
 
 
 async def ask_category_title(message: Message, state: FSMContext):
@@ -273,6 +272,7 @@ async def confirm_delete_category(call: CallbackQuery, state: FSMContext):
         update_user_data(user_id, user)
 
         await call.message.answer(f'✅ Категория {category_name} была удалена!', reply_markup=main_keyboard)
+        await call.message.delete()
         await state.reset_state(with_data=True)
 
 
