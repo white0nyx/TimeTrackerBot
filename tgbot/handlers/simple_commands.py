@@ -2,6 +2,7 @@
 import json
 
 from aiogram import Dispatcher
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 from aiogram.types import Message
 
@@ -48,8 +49,17 @@ async def my_data_command(message: Message):
     await message.answer(f"""<code>{user_info.replace("'", '"')}</code>""")
 
 
+async def state_command(message: Message, state: FSMContext):
+    """Вывод информации о стейте и данных, которые он хранит"""
+
+    async with state.proxy() as data:
+        state_data = str(dict(data)).replace("'", '"').replace('None', 'null')
+        await message.answer(f'<code>{state_data}</code>')
+
+
 def register_all_simple_commands(dp: Dispatcher):
     """Регистрация всех простых команд"""
     dp.register_message_handler(start_command, Command('start'), state=[None, States.my_categories])
     dp.register_message_handler(help_command, Command('help'), state=[None, States.my_categories])
     dp.register_message_handler(my_data_command, Command('my_data'), state=[None, States.my_categories])
+    dp.register_message_handler(state_command, Command('state'), state='*')
