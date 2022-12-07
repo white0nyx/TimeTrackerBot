@@ -54,7 +54,7 @@ async def state_command(message: Message, state: FSMContext):
 
     async with state.proxy() as data:
         state_data = str(dict(data)).replace("'", '"').replace('None', 'null')
-        await message.answer(f'<code>{state_data}</code>')
+        print(state_data)
 
 
 def register_all_simple_commands(dp: Dispatcher):

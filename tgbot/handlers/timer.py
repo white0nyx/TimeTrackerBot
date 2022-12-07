@@ -6,6 +6,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, CallbackQuery
 
 from tgbot.keyboards.inline import stop_timer_button, generate_category_keyboard, yes_no_keyboard
+from tgbot.keyboards.reply import main_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
 from tgbot.misc.work_with_text import get_the_time_in_seconds
@@ -46,6 +47,9 @@ async def stop_button(call: CallbackQuery, state: FSMContext):
         data['end_time'] = now
         data['day_index'] = datetime.weekday(call.message.date)
 
+        data['call_time'] = call
+        data['state_time'] = state
+
     user_id = call.from_user.id
     user = get_user_from_json_db(user_id)
     categories = user.get('categories')
@@ -66,17 +70,30 @@ async def stop_button(call: CallbackQuery, state: FSMContext):
 
 
 def register_stop_button(dp: Dispatcher):
-    dp.register_callback_query_handler(stop_button, text='stop', state=[None, States.my_categories, States.category_menu])
+    dp.register_callback_query_handler(stop_button, text='stop',
+                                       state=[None, States.my_categories, States.category_menu])
 
 
-async def no_add_button(call: CallbackQuery):
+async def no_add_button(call: CallbackQuery, state: FSMContext):
+    # if await state.get_state() in (States.add_new_category_name.state, States.add_new_category_based_seconds.state):
+    #
+    #     async with state.proxy() as data:
+    #         time = data['last_time']
+    #
+    #     await call.message.answer(f'Время {time} не было добавлено!', reply_markup=main_keyboard)
+    #     await state.reset_state(with_data=True)
+    #     await call.message.delete()
+    #     return
+
     await call.message.delete()
     await call.message.answer('Вы уверенны, что не хотите добавлять время к категории?',
                               reply_markup=yes_no_keyboard)
 
 
 def register_no_add_button(dp: Dispatcher):
-    dp.register_callback_query_handler(no_add_button, state=States.add_time_to_category, text='no_add')
+    dp.register_callback_query_handler(no_add_button, state=[States.add_time_to_category,
+                                                             States.add_new_category_name,
+                                                             States.add_new_category_based_seconds], text='no_add')
 
 
 async def confirm_no_add(call: CallbackQuery, state: FSMContext):
@@ -84,7 +101,7 @@ async def confirm_no_add(call: CallbackQuery, state: FSMContext):
         time = data['last_time']
 
     if call.data == 'yes':
-        await call.answer(f'Время {time} не было добавлено!')
+        await call.message.answer(f'Время {time} не было добавлено!', reply_markup=main_keyboard)
         await state.reset_state(with_data=True)
         await call.message.delete()
 
@@ -95,7 +112,11 @@ async def confirm_no_add(call: CallbackQuery, state: FSMContext):
 
 
 def register_register_no_add_button(dp: Dispatcher):
-    dp.register_callback_query_handler(confirm_no_add, state=States.add_time_to_category, text=['yes', 'no'])
+    dp.register_callback_query_handler(confirm_no_add,
+                                       state=[States.add_time_to_category,
+                                              States.add_new_category_name,
+                                              States.add_new_category_based_seconds],
+                                       text=['yes', 'no'])
 
 
 async def add_time_to_category(call: CallbackQuery, state: FSMContext):
@@ -136,13 +157,15 @@ async def add_time_to_category(call: CallbackQuery, state: FSMContext):
     await state.reset_state(with_data=True)
     await call.answer(cache_time=30)
 
-    await call.message.answer(f'✅ Время {time} успешно добавлено в категорию {category_name}')
+    await call.message.answer(f'✅ Время {time} успешно добавлено в категорию {category_name}',
+                              reply_markup=main_keyboard)
     await call.message.delete()
 
 
 def register_add_time_to_category(dp: Dispatcher):
     dp.register_callback_query_handler(add_time_to_category, Text(startswith='category_'),
-                                       state=States.add_time_to_category)
+                                       state=[States.add_time_to_category, States.add_new_category_name,
+                                              States.add_new_category_based_seconds])
 
 
 def register_all_timer(dp):

@@ -38,18 +38,23 @@ def register_my_categories_button(dp: Dispatcher):
                                 state=[None, States.my_categories, States.category_menu])
 
 
-async def add_new_category(call: CallbackQuery):
+async def add_new_category(call: CallbackQuery, state: FSMContext):
     """Обработка кнопки НОВАЯ КАТЕГОРИЯ"""
+    await call.message.delete()
     await call.answer(cache_time=60)
     await States.add_new_category_name.set()
-    await call.message.answer('Введите название категории', reply_markup=cancel_button)
+    await call.message.answer('Введите название для новой категории', reply_markup=cancel_button)
 
 
 def register_add_new_category(dp: Dispatcher):
     """Регистрация обработки кнопки НОВАЯ КАТЕГОРИЯ"""
-    dp.register_callback_query_handler(add_new_category, text='new_category', state=[None,
-                                                                                     States.add_time_to_category,
-                                                                                     States.my_categories])
+    dp.register_callback_query_handler(add_new_category,
+                                       text='new_category',
+                                       state=[None,
+                                              States.add_time_to_category,
+                                              States.my_categories,
+                                              States.add_new_category_name,
+                                              States.add_new_category_based_seconds])
 
 
 async def save_name_new_category(message: Message, state: FSMContext):

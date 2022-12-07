@@ -45,3 +45,9 @@ category_buttons = InlineKeyboardMarkup(inline_keyboard=[
         InlineKeyboardButton(text='❌ Удалить категорию', callback_data='delete_category')
     ],
 ])
+
+no_add_inline_button = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text='Не добавлять', callback_data='no_add')
+    ]
+])
