@@ -2,6 +2,10 @@ from tgbot.misc.analytics import get_total_analytics
 
 
 def is_valid_time(str_time, for_edit_time=False):
+
+    if str_time == '0':
+        return True
+
     if str_time.count(':') != 2 or not str_time.replace(':', '').isdigit():
         return '⚠ Данные введены некорректно!\n\n' \
                'Не соблюдён формат чч:мм:сс\n\n' \
@@ -39,6 +43,10 @@ def is_valid_time(str_time, for_edit_time=False):
 
 
 def get_the_time_in_seconds(str_time: str):
+
+    if str_time == '0':
+        return 0
+
     time_parts = str_time.split(':')
     h, m, s = tuple(map(int, time_parts))
     time_in_seconds = h * 3600 + m * 60 + s
