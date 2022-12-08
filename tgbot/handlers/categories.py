@@ -100,7 +100,7 @@ async def save_based_minutes_new_category(message: Message, state: FSMContext):
         data['suspect_category']['friday'] = 0
         data['suspect_category']['saturday'] = 0
         data['suspect_category']['sunday'] = 0
-        data['suspect_category']['operations'] = {}
+        data['suspect_category']['operations'] = []
 
     async with state.proxy() as data:
         category_name = data['suspect_category']['name']
@@ -159,10 +159,13 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
                 user['categories'][-1][days[day_index]] = new_time
 
                 date_now = str(datetime.now()).split()[0]
-                if user['categories'][-1]['operations'].get(date_now) is None:
-                    user['categories'][-1]['operations'][date_now] = new_time
-                else:
-                    user['categories'][-1]['operations'][date_now] += new_time
+                start = str(data.get('last_start'))
+                end = str(data.get('end_time'))
+                seconds = get_the_time_in_seconds(data.get('last_time'))
+                user['categories'][-1]['operations'].append({'date': date_now,
+                                                             'start': start,
+                                                             'end': end,
+                                                             'seconds': seconds})
 
             update_user_data(user_id, user)
 
@@ -180,7 +183,7 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
 
 def register_confirm_data(dp: Dispatcher):
     """Регистрация обработчика подтверждения данных"""
-    dp.register_callback_query_handler(confirm_data, text=['yes', 'no'], state=States.confirm_data)
+    dp.register_callback_query_handler(confirm_data, text=['yes', 'no'], state=[States.confirm_data])
 
 
 def register_all_categories_handlers(dp: Dispatcher):

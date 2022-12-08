@@ -8,7 +8,6 @@ def get_user_from_json_db(user_id):
 
 
 def update_user_data(user_id, new_data):
-
     with open('data/users.json', 'r', encoding='utf-8') as db:
         old_users_data = json.load(db)
 
@@ -44,12 +43,22 @@ def fill_past_date(user_id, callback_data, date=str(datetime.now()).split()[0]):
     operations = category.get('operations')
 
     if len(operations) == 0:
-        operations[date] = 0
+        operations.append({'date': date,
+                           'start': None,
+                           'end': None,
+                           'seconds': None})
+
         update_user_data(user_id, user)
         return
 
-    while date not in operations.keys():
-        operations[date] = 0
+    dates = get_all_dates_operations(operations)
+
+    while date not in dates:
+        operations.append({'date': date,
+                           'start': None,
+                           'end': None,
+                           'seconds': None})
+        dates.append(date)
 
         year, month, day = list(map(int, date.split('-')))
 
@@ -72,7 +81,7 @@ def fill_past_date(user_id, callback_data, date=str(datetime.now()).split()[0]):
 
         date = str(year) + '-' + '0' * (2 - len(str(month))) + str(month) + '-' + '0' * (2 - len(str(day))) + str(day)
 
-    operations = dict(sorted(operations.items(), key=lambda x: x[0]))
+    operations = list(sorted(operations, key=lambda x: x['date']))
 
     category['operations'] = operations
 
@@ -90,24 +99,54 @@ def fill_all_categories_past_date(user_id):
 
 
 def possible_add_time(user_id, time_in_seconds, category_name):
-    today = str(datetime.now()).split()[0]
     user = get_user_from_json_db(user_id)
 
     categories = user.get('categories')
 
     for category in categories:
         if category['name'] == category_name:
-            return {'is_possible_add_time': category['operations'][today] + time_in_seconds <= 86_400,
-                    'seconds_today': category['operations'][today]}
+            operations = category['operations']
+            seconds_today = get_total_sec_today(operations)
+            return {'is_possible_add_time': seconds_today + time_in_seconds <= 86_400,
+                    'seconds_today': seconds_today}
 
 
 def possible_sub_time(user_id, time_in_seconds, category_name):
-    today = str(datetime.now()).split()[0]
     user = get_user_from_json_db(user_id)
 
     categories = user.get('categories')
 
     for category in categories:
         if category['name'] == category_name:
-            return {'is_possible_sub_time': category['operations'][today] - time_in_seconds >= 0,
-                    'seconds_today': category['operations'][today]}
+            operations = category['operations']
+            seconds_today = get_total_sec_today(operations)
+            return {'is_possible_sub_time': seconds_today - time_in_seconds >= 0,
+                    'seconds_today': seconds_today}
+
+
+def get_all_dates_operations(operations):
+    dates = []
+    for operation in operations:
+        dates.append(operation['date'])
+
+    return dates
+
+
+def get_total_sec_today(operations):
+    today = str(datetime.now()).split()[0]
+    last_operation_data = '3000-01-01'
+
+    total_sec_today = 0
+    for operation in operations:
+
+        if operation.get('seconds') is None:
+            continue
+
+        if operation.get('date') > last_operation_data == today:
+            break
+
+        if operation.get('date') == today:
+            total_sec_today += operation.get('seconds')
+
+        last_operation_data = operation['date']
+    return total_sec_today

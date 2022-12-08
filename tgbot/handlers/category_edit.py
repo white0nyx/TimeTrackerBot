@@ -11,7 +11,7 @@ from tgbot.misc.states import States
 from tgbot.misc.work_with_date import get_day_of_week
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
     possible_add_time, possible_sub_time
-from tgbot.misc.work_with_text import get_category_info_message, convert_to_preferred_format, is_valid_time,\
+from tgbot.misc.work_with_text import get_category_info_message, convert_to_preferred_format, is_valid_time, \
     get_the_time_in_seconds
 
 
@@ -95,13 +95,13 @@ async def confirm_changing_time(message: Message, state: FSMContext):
         seconds_today = check_possible_add_time.get('seconds_today')
 
         if not is_possible_add_time:
-
             await message.answer('⚠ Данные введены некорректно!\n\n'
                                  f'Вы не можете добавить такое количество времени, '
                                  f'поскольку иначе получится, что за эти сутки вы '
                                  f'уделили этой категории более 24 часов\n\n'
                                  f'Потрачено времени сегодня: {convert_to_preferred_format(seconds_today)}\n'
-                                 f'Ещё можно добавить сегодня: {convert_to_preferred_format(86_400 - seconds_today)}', reply_markup=cancel_button)
+                                 f'Ещё можно добавить сегодня: {convert_to_preferred_format(86_400 - seconds_today)}',
+                                 reply_markup=cancel_button)
             return
 
         await States.confirm_add_time.set()
@@ -126,7 +126,8 @@ async def confirm_changing_time(message: Message, state: FSMContext):
     async with state.proxy() as data:
         data['time_in_seconds'] = time_in_seconds
 
-    await message.answer(f'Вы хотите {action} {convert_to_preferred_format(time_in_seconds)}?', reply_markup=yes_no_keyboard)
+    await message.answer(f'Вы хотите {action} {convert_to_preferred_format(time_in_seconds)}?',
+                         reply_markup=yes_no_keyboard)
 
 
 def register_confirm_changing_time(dp: Dispatcher):
@@ -166,19 +167,24 @@ async def change_time(call: CallbackQuery, state: FSMContext):
             if category['name'] == category_title:
                 today = get_day_of_week(call)
 
+                date_now = str(datetime.now()).split()[0]
                 if await state.get_state() == States.confirm_add_time.state:
                     category['seconds'] += time_in_seconds
                     category[today] += time_in_seconds
 
-                    date_now = str(datetime.now()).split()[0]
-                    category['operations'][date_now] += time_in_seconds
+                    category['operations'].append({'date': date_now,
+                                                   'start': None,
+                                                   'end': None,
+                                                   'seconds': time_in_seconds})
 
                 else:
                     category['seconds'] -= time_in_seconds
                     category[today] -= time_in_seconds
 
-                    date_now = str(datetime.now()).split()[0]
-                    category['operations'][date_now] -= time_in_seconds
+                    category['operations'].append({'date': date_now,
+                                                   'start': None,
+                                                   'end': None,
+                                                   'seconds': 0 - time_in_seconds})
 
                 break
 

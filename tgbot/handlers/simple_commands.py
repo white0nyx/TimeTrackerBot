@@ -23,12 +23,17 @@ async def start_command(message: Message):
     user_id = message.from_user.id
     username = message.from_user.username
     full_name = message.from_user.full_name
+    today = str(message.date)
 
     with open('data/users.json', 'r+', encoding='utf-8') as db:
         users = json.load(db)
 
         if str(user_id) not in users.keys():
-            users[user_id] = {'user_data': {'id': user_id, 'username': username, 'full_name': full_name},
+            users[user_id] = {'user_data': {'id': user_id,
+                                            'username': username,
+                                            'full_name': full_name,
+                                            'member_since': today},
+
                               'categories': []}
 
         db.seek(0)
@@ -54,7 +59,9 @@ async def state_command(message: Message, state: FSMContext):
 
     async with state.proxy() as data:
         state_data = str(dict(data)).replace("'", '"').replace('None', 'null')
+        print(await state.get_state())
         print(state_data)
+        print()
 
 
 def register_all_simple_commands(dp: Dispatcher):

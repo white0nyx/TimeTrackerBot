@@ -8,7 +8,8 @@ from aiogram.types import Message, CallbackQuery
 from tgbot.keyboards.inline import stop_timer_button, generate_category_keyboard, yes_no_keyboard
 from tgbot.keyboards.reply import main_keyboard
 from tgbot.misc.states import States
-from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
+from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
+    get_all_dates_operations
 from tgbot.misc.work_with_text import get_the_time_in_seconds
 
 
@@ -147,10 +148,14 @@ async def add_time_to_category(call: CallbackQuery, state: FSMContext):
                 category[days[day_index]] += time_in_seconds
 
                 date_now = str(datetime.now()).split()[0]
-                if category['operations'].get(date_now) is None:
-                    category['operations'][date_now] = time_in_seconds
-                else:
-                    category['operations'][date_now] += time_in_seconds
+                start = str(data.get('last_start'))
+                end = str(data.get('end_time'))
+                seconds = get_the_time_in_seconds(data.get('last_time'))
+
+                category['operations'].append({'date': date_now,
+                                               'start': start,
+                                               'end': end,
+                                               'seconds': seconds})
 
         update_user_data(user_id, user)
 
