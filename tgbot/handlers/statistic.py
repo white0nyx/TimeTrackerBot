@@ -19,7 +19,7 @@ async def statistic_button(message: Message):
 
     categories = user.get('categories')
 
-    text = get_statistic(categories)
+    text = get_statistic(user_id, categories)
 
     await message.answer(text=text)
 

@@ -1,3 +1,6 @@
+from tgbot.misc.analytics import get_total_analytics
+
+
 def is_valid_time(str_time, for_edit_time=False):
     if str_time.count(':') != 2 or not str_time.replace(':', '').isdigit():
         return '⚠ Данные введены некорректно!\n\n' \
@@ -52,11 +55,28 @@ def convert_to_preferred_format(sec):
     return "%02d:%02d:%02d" % (hour, minutes, sec)
 
 
-def get_statistic(categories):
-    text = '📈 Ваша статистика\n\n'
+def get_statistic(user_id, categories):
+    text = '📈 Ваша общая статистика\n\n'
+
+    user_statistic = get_total_analytics(user_id)
+    total_time = convert_to_preferred_format(user_statistic.get('total_time'))
+    total_sessions = user_statistic.get('total_sessions')
+    time_per_day = convert_to_preferred_format(user_statistic.get('time_per_day'))
+    average_time_in_category = convert_to_preferred_format(user_statistic.get('average_time_in_category'))
+    count_categories = user_statistic.get('count_categories')
+    member_since = user_statistic.get('member_since')
+
+    text += f'Потрачено времени: {total_time}\n' \
+            f'Количество операций: {total_sessions}\n\n' \
+            f'Время в день: {time_per_day}\n' \
+            f'Время на категорию: {average_time_in_category}\n\n' \
+            f'Количество категорий: {count_categories}\n' \
+            f'Подписчик с {member_since}\n\n'
 
     for category in categories:
-        text += f'{category["name"]} - {convert_to_preferred_format(category["seconds"])}\n'
+        operations = category.get('operations')
+        count_sessions = len([x for x in operations if x.get('seconds') is not None])
+        text += f'{category["name"]} - {convert_to_preferred_format(category["seconds"])} - {count_sessions}\n'
 
     return text
 
