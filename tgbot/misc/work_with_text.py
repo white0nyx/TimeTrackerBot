@@ -2,7 +2,6 @@ from tgbot.misc.analytics import get_total_analytics
 
 
 def is_valid_time(str_time, for_edit_time=False):
-
     if str_time == '0':
         return True
 
@@ -43,7 +42,6 @@ def is_valid_time(str_time, for_edit_time=False):
 
 
 def get_the_time_in_seconds(str_time: str):
-
     if str_time == '0':
         return 0
 
@@ -78,13 +76,14 @@ def get_statistic(user_id, categories):
             f'Количество операций: {total_sessions}\n\n' \
             f'Время в день: {time_per_day}\n' \
             f'Время на категорию: {average_time_in_category}\n\n' \
-            f'Количество категорий: {count_categories}\n' \
-            f'Подписчик с {member_since}\n\n'
+            f'Количество категорий: {count_categories}\n\n'
 
     for category in categories:
         operations = category.get('operations')
         count_sessions = len([x for x in operations if x.get('seconds') is not None])
         text += f'{category["name"]} - {convert_to_preferred_format(category["seconds"])} - {count_sessions}\n'
+
+    text += f'\n👤 Подписчик с {member_since}\n\n'
 
     return text
 

@@ -17,7 +17,10 @@ def update_user_data(user_id, new_data):
         json.dump(old_users_data, db, indent=4, ensure_ascii=False)
 
 
-def fill_past_date(user_id, callback_data, date=str(datetime.now()).split()[0]):
+def fill_past_date(user_id, callback_data):
+
+    date = str(datetime.now()).split()[0]
+
     days_in_month = {
         1: 31,
         2: [28, 29],
