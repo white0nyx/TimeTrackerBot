@@ -1,4 +1,8 @@
 from tgbot.misc.work_with_json import get_user_from_json_db
+import matplotlib.pyplot as plt
+import json
+
+import numpy as np
 
 
 def get_total_analytics(user_id):
@@ -37,3 +41,54 @@ def get_total_analytics(user_id):
             'average_time_in_category': average_time_in_category,
             'count_categories': count_categories,
             'member_since': member_since}
+
+
+def get_dict_data_all_seconds(user_id):
+    with open('data/users.json', 'r', encoding='utf-8') as file:
+        user = json.load(file).get(str(user_id))
+
+    categories = user.get('categories')
+
+    all_days_and_operations = {}
+
+    for category in categories:
+        operations = category.get('operations')
+        for operation in operations:
+
+            date = operation.get('date')
+            seconds = operation.get('seconds')
+
+            if seconds is None:
+                seconds = 0
+
+            all_days_and_operations[date] = 0
+
+            all_days_and_operations[date] += seconds / 3600
+
+    all_days_and_operations = dict(sorted(all_days_and_operations.items()))
+    return all_days_and_operations
+
+
+def get_plot_total_time(user_id):
+    data_dict = get_dict_data_all_seconds(user_id)
+    days = list(data_dict.keys())
+    rln = range(len(days))
+    seconds = data_dict.values()
+
+    all_time_progress_list = [0]
+    for sec in seconds:
+        last_all_time = all_time_progress_list[-1]
+        all_time_progress_list.append(last_all_time + sec)
+    all_time_progress_list = all_time_progress_list[1:]
+
+    plt.title('Изменение количества общих часов')
+    plt.xlabel('День использования бота')
+    plt.ylabel('Потрачено часов')
+
+    plt.xticks(rln, days)
+    if len(all_time_progress_list) >= 4:
+        plt.xticks(rln, days, len(all_time_progress_list) // 4)
+
+    plt.plot(rln, all_time_progress_list, 'o-r')
+    plt.savefig(f'data/{user_id}_total_time.png')
+    plt.clf()
