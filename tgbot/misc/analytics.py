@@ -90,7 +90,7 @@ def get_plot_total_time(user_id):
     plt.xlabel('День использования бота')
     plt.ylabel('Потрачено часов')
     plt.xticks(range(len(days)))
-    day_use_bot = list(range(len(days)))
+    day_use_bot = list(range(1, len(days)+1))
     
     if len(days) == 1:
         plt.plot(day_use_bot, all_time_progress_list, 'o-r')
