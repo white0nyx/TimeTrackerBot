@@ -168,6 +168,15 @@ async def change_time(call: CallbackQuery, state: FSMContext):
                 today = get_day_of_week(call)
 
                 date_now = str(datetime.now()).split()[0]
+
+                empty_day = {'date': date_now,
+                             'start': None,
+                             'end': None,
+                             'seconds': None}
+
+                if empty_day in category['operations']:
+                    category['operations'].remove(empty_day)
+
                 if await state.get_state() == States.confirm_add_time.state:
                     category['seconds'] += time_in_seconds
                     category[today] += time_in_seconds

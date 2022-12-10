@@ -152,6 +152,14 @@ async def add_time_to_category(call: CallbackQuery, state: FSMContext):
                 end = str(data.get('end_time'))
                 seconds = get_the_time_in_seconds(data.get('last_time'))
 
+                empty_day = {'date': date_now,
+                             'start': None,
+                             'end': None,
+                             'seconds': None}
+
+                if empty_day in category['operations']:
+                    category['operations'].remove(empty_day)
+
                 category['operations'].append({'date': date_now,
                                                'start': start,
                                                'end': end,
