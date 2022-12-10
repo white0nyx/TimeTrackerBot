@@ -1,3 +1,8 @@
+from datetime import date
+
+import matplotlib
+import pylab
+
 from tgbot.misc.work_with_json import get_user_from_json_db
 import matplotlib.pyplot as plt
 import json
@@ -61,7 +66,8 @@ def get_dict_data_all_seconds(user_id):
             if seconds is None:
                 seconds = 0
 
-            all_days_and_operations[date] = 0
+            if all_days_and_operations.get(date) is None:
+                all_days_and_operations[date] = 0
 
             all_days_and_operations[date] += seconds / 3600
 
@@ -72,7 +78,6 @@ def get_dict_data_all_seconds(user_id):
 def get_plot_total_time(user_id):
     data_dict = get_dict_data_all_seconds(user_id)
     days = list(data_dict.keys())
-    rln = range(len(days))
     seconds = data_dict.values()
 
     all_time_progress_list = [0]
@@ -84,11 +89,13 @@ def get_plot_total_time(user_id):
     plt.title('Изменение количества общих часов')
     plt.xlabel('День использования бота')
     plt.ylabel('Потрачено часов')
+    plt.xticks(range(len(days)))
+    day_use_bot = list(range(len(days)))
+    
+    if len(days) == 1:
+        plt.plot(day_use_bot, all_time_progress_list, 'o-r')
+    else:
+        plt.plot(day_use_bot, all_time_progress_list, 'r')
 
-    plt.xticks(rln, days)
-    if len(all_time_progress_list) >= 4:
-        plt.xticks(rln, days, len(all_time_progress_list) // 4)
-
-    plt.plot(rln, all_time_progress_list, 'o-r')
     plt.savefig(f'data/{user_id}_total_time.png')
     plt.clf()
