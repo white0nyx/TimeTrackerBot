@@ -27,7 +27,7 @@ def get_total_analytics(user_id):
         total_hours_without_based_seconds += total_seconds_without_based_seconds
         operations = category['operations']
 
-        total_operations += len([x for x in operations if x.get('seconds') is not None])
+        total_operations += len([x for x in operations if x.get('seconds') is not None and x.get('seconds') > 0])
 
         for operation in operations:
 
@@ -199,7 +199,7 @@ def get_duration_sessions_data(user_id):
 
             seconds = operation.get('seconds')
 
-            if seconds is None:
+            if seconds is None or seconds <= 0:
                 continue
 
             if seconds < 1_800:

@@ -80,7 +80,7 @@ def get_statistic(user_id, categories):
 
     for category in categories:
         operations = category.get('operations')
-        count_sessions = len([x for x in operations if x.get('seconds') is not None])
+        count_sessions = len([x for x in operations if x.get('seconds') is not None and x.get('seconds') > 0])
         text += f'{category["name"]} - {convert_to_preferred_format(category["seconds"])} - {count_sessions}\n'
 
     text += f'\n👤 Подписчик с {member_since}\n\n'
