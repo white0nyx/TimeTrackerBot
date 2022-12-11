@@ -175,8 +175,8 @@ def get_diagram_week_statistic(user_id):
 
     fig, ax = plt.subplots(figsize=(9, 6))
 
-    rects_1 = ax.bar(x - width / 2, hours_per_day, width, label='Часы')
-    rects_1 = ax.bar(x + width / 2, sessions_per_day, width, label='Сессии')
+    ax.bar(x - width / 2, hours_per_day, width, label='Часы')
+    ax.bar(x + width / 2, sessions_per_day, width, label='Сессии')
 
     ax.set_title('Статистика по дням')
     ax.set_xticks(x)
@@ -184,4 +184,58 @@ def get_diagram_week_statistic(user_id):
     ax.legend()
     ax.grid()
     plt.savefig(f'data/{user_id}_week_statistic.png')
+    plt.clf()
+
+
+def get_duration_sessions_data(user_id):
+    sessions_durations = {'< 30 минут': 0, '30-60 минут': 0, '1-2 часа': 0, '2-4 часа': 0, '4+ часа': 0}
+
+    user = get_user_from_json_db(user_id)
+    categories = user.get('categories')
+
+    for category in categories:
+
+        for operation in category.get('operations'):
+
+            seconds = operation.get('seconds')
+
+            if seconds is None:
+                continue
+
+            if seconds < 1_800:
+                sessions_durations['< 30 минут'] += 1
+
+            elif 1_800 <= seconds < 3_600:
+                sessions_durations['30-60 минут'] += 1
+
+            elif 3_600 <= seconds < 7_200:
+                sessions_durations['1-2 часа'] += 1
+
+            elif 7_200 <= seconds < 14_400:
+                sessions_durations['2-4 часа'] += 1
+
+            elif 14_400 <= seconds:
+                sessions_durations['4+ часа'] += 1
+
+    return sessions_durations
+
+
+def get_circle_diagram_sessions_durations(user_id):
+    sessions_durations_data = get_duration_sessions_data(user_id)
+    clear_sessions_durations_data = {}
+
+    for key, value in sessions_durations_data.items():
+        if value != 0:
+            clear_sessions_durations_data[key] = value
+
+    labels = list(clear_sessions_durations_data.keys())
+    values = list(clear_sessions_durations_data.values())
+
+    fig, ax = plt.subplots(figsize=(9, 6))
+    ax.pie(values, labels=labels, autopct='%1.1f%%', shadow=False,
+           wedgeprops={'lw': 1, 'ls': '-', 'edgecolor': 'k'},
+           rotatelabels=True)
+    ax.axis('equal')
+
+    plt.savefig(f'data/{user_id}_sessions_durations_statistic.png')
     plt.clf()
