@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 import matplotlib
 import pylab
@@ -90,12 +90,96 @@ def get_plot_total_time(user_id):
     plt.xlabel('День использования бота')
     plt.ylabel('Потрачено часов')
     plt.xticks(range(len(days)))
-    day_use_bot = list(range(1, len(days)+1))
-    
+    day_use_bot = list(range(1, len(days) + 1))
+
     if len(days) == 1:
         plt.plot(day_use_bot, all_time_progress_list, 'o-r')
     else:
         plt.plot(day_use_bot, all_time_progress_list, 'r')
 
+    plt.grid()
     plt.savefig(f'data/{user_id}_total_time.png')
+    plt.clf()
+
+
+def get_statistic_by_day_of_week(user_id):
+    user = get_user_from_json_db(user_id)
+    categories = user.get('categories')
+
+    days_and_sessions = {'monday': {'hours': 0, 'sessions': 0},
+                         'tuesday': {'hours': 0, 'sessions': 0},
+                         'wednesday': {'hours': 0, 'sessions': 0},
+                         'thursday': {'hours': 0, 'sessions': 0},
+                         'friday': {'hours': 0, 'sessions': 0},
+                         'saturday': {'hours': 0, 'sessions': 0},
+                         'sunday': {'hours': 0, 'sessions': 0}}
+
+    dict_data_all_seconds = get_dict_data_all_seconds(user_id)
+
+    for date, hours in dict_data_all_seconds.items():
+        year, month, day = map(int, date.split('-'))
+
+        days = {0: 'monday',
+                1: 'tuesday',
+                2: 'wednesday',
+                3: 'thursday',
+                4: 'friday',
+                5: 'saturday',
+                6: 'sunday'}
+
+        day_of_week = days[datetime(year, month, day).weekday()]
+
+        days_and_sessions[day_of_week]['hours'] += hours
+
+    for category in categories:
+        for operation in category.get('operations'):
+            date = operation.get('date')
+            seconds = operation.get('seconds')
+
+            if seconds is None:
+                continue
+
+            year, month, day = map(int, date.split('-'))
+
+            days = {0: 'monday',
+                    1: 'tuesday',
+                    2: 'wednesday',
+                    3: 'thursday',
+                    4: 'friday',
+                    5: 'saturday',
+                    6: 'sunday'}
+
+            day_of_week = days[datetime(year, month, day).weekday()]
+            if seconds > 0:
+                days_and_sessions[day_of_week]['sessions'] += 1
+
+    return days_and_sessions
+
+
+def get_diagram_week_statistic(user_id):
+    days_and_sessions = get_statistic_by_day_of_week(user_id)
+
+    days_of_week = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
+
+    hours_per_day = []
+    sessions_per_day = []
+    for day in days_and_sessions.values():
+        hours_per_day.append(day.get('hours'))
+        sessions_per_day.append(day.get('sessions'))
+
+    width = 0.3
+
+    x = np.arange(len(days_of_week))
+
+    fig, ax = plt.subplots(figsize=(9, 6))
+
+    rects_1 = ax.bar(x - width / 2, hours_per_day, width, label='Часы')
+    rects_1 = ax.bar(x + width / 2, sessions_per_day, width, label='Сессии')
+
+    ax.set_title('Статистика по дням')
+    ax.set_xticks(x)
+    ax.set_xticklabels(days_of_week)
+    ax.legend()
+    ax.grid()
+    plt.savefig(f'data/{user_id}_week_statistic.png')
     plt.clf()
