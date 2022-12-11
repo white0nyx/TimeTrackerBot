@@ -239,3 +239,9 @@ def get_circle_diagram_sessions_durations(user_id):
 
     plt.savefig(f'data/{user_id}_sessions_durations_statistic.png')
     plt.clf()
+
+
+def is_possible_get_circle_diagram_sessions_durations(user_id):
+    sessions_durations_data = get_duration_sessions_data(user_id)
+    values = tuple(sessions_durations_data.values())
+    return not values[0] == values[1] == values[2] == values[3] == values[4] == 0
