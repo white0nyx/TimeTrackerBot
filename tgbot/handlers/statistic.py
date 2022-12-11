@@ -38,6 +38,7 @@ async def statistic_button(message: Message):
 
     await message.answer_media_group(album)
     os.remove(f'data/{user_id}_total_time.png')
+    os.remove(f'data/{user_id}_week_statistic.png')
 
 
 def register_statistic_button(dp: Dispatcher):

@@ -80,6 +80,8 @@ def get_plot_total_time(user_id):
     days = list(data_dict.keys())
     seconds = data_dict.values()
 
+    plt.figure(figsize=(9, 6))
+
     all_time_progress_list = [0]
     for sec in seconds:
         last_all_time = all_time_progress_list[-1]
