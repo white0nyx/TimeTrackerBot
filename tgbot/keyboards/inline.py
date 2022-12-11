@@ -35,7 +35,7 @@ def generate_category_keyboard(categories=(), no_add_button=False):
 
 category_buttons = InlineKeyboardMarkup(inline_keyboard=[
     [
-        InlineKeyboardButton(text='👀 Посмотреть сессии', callback_data='category_operation')
+        InlineKeyboardButton(text='👀 Посмотреть сессии', callback_data='category_operations')
     ],
     [
         InlineKeyboardButton(text='➕ Добавить время', callback_data='add_time')

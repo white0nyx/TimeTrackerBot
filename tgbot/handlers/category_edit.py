@@ -10,9 +10,9 @@ from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_date import get_day_of_week
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
-    possible_add_time, possible_sub_time
+    possible_add_time, possible_sub_time, get_all_category_operations
 from tgbot.misc.work_with_text import get_category_info_message, convert_to_preferred_format, is_valid_time, \
-    get_the_time_in_seconds
+    get_the_time_in_seconds, get_text_category_operations
 
 
 async def category_inline_button(call: CallbackQuery):
@@ -35,6 +35,22 @@ async def category_inline_button(call: CallbackQuery):
 
 def register_category_inline_button(dp: Dispatcher):
     dp.register_callback_query_handler(category_inline_button, state=[None, States.my_categories])
+
+
+async def see_category_operations(call: CallbackQuery):
+    await call.answer(cache_time=10)
+    user_id = call.from_user.id
+    category_name = call.message.text.split('\n\n')[0]
+
+    operations = get_all_category_operations(user_id, category_name)
+    text = get_text_category_operations(operations)
+
+    await call.message.answer(text)
+
+
+def register_see_category_operations(dp: Dispatcher):
+    dp.register_callback_query_handler(see_category_operations, state=[States.category_menu],
+                                       text='category_operations')
 
 
 async def edit_category(call: CallbackQuery, state: FSMContext):
@@ -297,6 +313,7 @@ def register_confirm_delete_category(dp: Dispatcher):
 
 def register_all_category_edit(dp):
     register_category_inline_button(dp)
+    register_see_category_operations(dp)
     register_edit_category(dp)
     register_confirm_changing_time(dp)
     register_change_time(dp)

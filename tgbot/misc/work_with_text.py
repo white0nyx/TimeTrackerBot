@@ -142,3 +142,25 @@ def get_word_end_rp(minutes: int):
 
     else:
         return ends.get(str_number[-1])
+
+
+def get_text_category_operations(operations):
+    text = 'Все операции этой категории:\n\n'
+
+    for counter, operation in enumerate(operations[-11:], start=1):
+
+        seconds = operation.get("seconds")
+        date = operation.get('date')
+
+        if seconds is None:
+            continue
+
+        if operation.get('start') is None:
+            text += f'{counter}. ✋ Добавлено вручную {convert_to_preferred_format(seconds)}\n' \
+                    f'Дата: {date}\n\n'
+
+        else:
+            text += f'{counter}. ⏱ Добавлено через таймер {convert_to_preferred_format(operation.get("seconds"))}\n' \
+                    f'Дата: {operation.get("end")}\n\n'
+
+    return text

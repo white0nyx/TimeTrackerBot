@@ -153,3 +153,22 @@ def get_total_sec_today(operations):
 
         last_operation_data = operation['date']
     return total_sec_today
+
+
+def get_all_category_operations(user_id, category_name):
+    user = get_user_from_json_db(user_id)
+
+    operations = None
+    for category in user['categories']:
+        if category['name'] == category_name:
+
+            operations = category.get('operations')
+
+            break
+
+    return operations
+
+
+
+
+
