@@ -179,7 +179,6 @@ def get_operation_by_serial_number_from_the_end(user_id, category_name, serial_n
 
 
 def delete_operation_from_db(user_id, category_name, operation):
-
     user = get_user_from_json_db(user_id)
     categories = user['categories']
 
@@ -194,5 +193,3 @@ def delete_operation_from_db(user_id, category_name, operation):
         operations.remove(operation)
         update_user_data(user_id, user)
         return
-
-

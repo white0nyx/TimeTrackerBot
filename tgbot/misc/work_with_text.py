@@ -1,5 +1,4 @@
 from tgbot.misc.analytics import get_total_analytics
-from tgbot.misc.work_with_json import fill_all_categories_past_date
 
 
 def is_valid_time(str_time, for_edit_time=False):
