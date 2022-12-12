@@ -191,5 +191,6 @@ def delete_operation_from_db(user_id, category_name, operation):
 
     if operation in operations:
         operations.remove(operation)
+        category['seconds'] -= operation.get('seconds')
         update_user_data(user_id, user)
         return
