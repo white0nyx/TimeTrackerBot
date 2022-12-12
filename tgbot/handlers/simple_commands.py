@@ -59,9 +59,10 @@ async def state_command(message: Message, state: FSMContext):
 
     async with state.proxy() as data:
         state_data = str(dict(data)).replace("'", '"').replace('None', 'null')
+        await message.answer('Данные переданы в консоль')
+
         print(await state.get_state())
-        print(state_data)
-        print()
+        print(state_data, end='\n\n')
 
 
 def register_all_simple_commands(dp: Dispatcher):

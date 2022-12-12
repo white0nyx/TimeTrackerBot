@@ -18,6 +18,10 @@ class States(StatesGroup):
     # Меню категории
     category_menu = State()
 
+    # Удаление операции
+    delete_operation_state = State()
+    confirm_delete_operation_state = State()
+
     # Ожидание и подтверждение времени для добавления
     wait_add_time = State()
     confirm_add_time = State()

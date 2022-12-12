@@ -8,8 +8,7 @@ from aiogram.types import Message, CallbackQuery
 from tgbot.keyboards.inline import stop_timer_button, generate_category_keyboard, yes_no_keyboard
 from tgbot.keyboards.reply import main_keyboard
 from tgbot.misc.states import States
-from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
-    get_all_dates_operations
+from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
 from tgbot.misc.work_with_text import get_the_time_in_seconds
 
 
@@ -75,16 +74,7 @@ def register_stop_button(dp: Dispatcher):
                                        state=[None, States.my_categories, States.category_menu])
 
 
-async def no_add_button(call: CallbackQuery, state: FSMContext):
-    # if await state.get_state() in (States.add_new_category_name.state, States.add_new_category_based_seconds.state):
-    #
-    #     async with state.proxy() as data:
-    #         time = data['last_time']
-    #
-    #     await call.message.answer(f'Время {time} не было добавлено!', reply_markup=main_keyboard)
-    #     await state.reset_state(with_data=True)
-    #     await call.message.delete()
-    #     return
+async def no_add_button(call: CallbackQuery):
 
     await call.message.delete()
     await call.message.answer('Вы уверенны, что не хотите добавлять время к категории?',

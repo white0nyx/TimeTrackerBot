@@ -53,3 +53,9 @@ no_add_inline_button = InlineKeyboardMarkup(inline_keyboard=[
         InlineKeyboardButton(text='Не добавлять', callback_data='no_add')
     ]
 ])
+
+delete_operation_inline_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text='🗑 Удалить операцию', callback_data='delete_operation')
+    ]
+])

@@ -18,7 +18,6 @@ def update_user_data(user_id, new_data):
 
 
 def fill_past_date(user_id, callback_data):
-
     date = str(datetime.now()).split()[0]
 
     days_in_month = {
@@ -155,20 +154,45 @@ def get_total_sec_today(operations):
     return total_sec_today
 
 
-def get_all_category_operations(user_id, category_name):
+def get_all_not_none_category_operations(user_id, category_name):
     user = get_user_from_json_db(user_id)
 
-    operations = None
+    not_none_operations = []
     for category in user['categories']:
         if category['name'] == category_name:
-
             operations = category.get('operations')
+            for operation in operations:
+                if operation.get('seconds') is not None:
+                    not_none_operations.append(operation)
 
+    return not_none_operations
+
+
+def get_operation_by_serial_number_from_the_end(user_id, category_name, serial_number_of_operation):
+    operations = get_all_not_none_category_operations(user_id, category_name)
+
+    index = int(serial_number_of_operation) - 1
+
+    operation = operations[-10:][index]
+
+    return operation
+
+
+def delete_operation_from_db(user_id, category_name, operation):
+
+    user = get_user_from_json_db(user_id)
+    categories = user['categories']
+
+    category = None
+    for category in categories:
+        if category['name'] == category_name:
             break
 
-    return operations
+    operations = category['operations']
 
-
-
+    if operation in operations:
+        operations.remove(operation)
+        update_user_data(user_id, user)
+        return
 
 

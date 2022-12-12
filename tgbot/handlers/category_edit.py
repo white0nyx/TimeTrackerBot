@@ -4,13 +4,13 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from tgbot.handlers.cancel import cancel_button
-from tgbot.keyboards.inline import category_buttons, yes_no_keyboard
+from tgbot.keyboards.inline import category_buttons, yes_no_keyboard, delete_operation_inline_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_date import get_day_of_week
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
-    possible_add_time, possible_sub_time, get_all_category_operations
+    possible_add_time, possible_sub_time, get_operation_by_serial_number_from_the_end, \
+    get_all_not_none_category_operations, delete_operation_from_db
 from tgbot.misc.work_with_text import get_category_info_message, convert_to_preferred_format, is_valid_time, \
     get_the_time_in_seconds, get_text_category_operations
 
@@ -37,20 +37,97 @@ def register_category_inline_button(dp: Dispatcher):
     dp.register_callback_query_handler(category_inline_button, state=[None, States.my_categories])
 
 
-async def see_category_operations(call: CallbackQuery):
+async def see_category_operations(call: CallbackQuery, state: FSMContext):
     await call.answer(cache_time=10)
     user_id = call.from_user.id
     category_name = call.message.text.split('\n\n')[0]
 
-    operations = get_all_category_operations(user_id, category_name)
+    operations = get_all_not_none_category_operations(user_id, category_name)
     text = get_text_category_operations(operations)
 
-    await call.message.answer(text)
+    if len(operations) == 0:
+        await call.message.answer('У вас пока нет ни одной операции в данной категории')
+        return
+
+    async with state.proxy() as data:
+        data['category_name'] = category_name
+        data['last_operations'] = operations
+
+    await call.message.answer(text, reply_markup=delete_operation_inline_keyboard)
 
 
 def register_see_category_operations(dp: Dispatcher):
     dp.register_callback_query_handler(see_category_operations, state=[States.category_menu],
                                        text='category_operations')
+
+
+async def press_button_delete_operation(call: CallbackQuery):
+    await call.answer(cache_time=10)
+    await call.message.answer('Для удаления операции введите её порядковый номер', reply_markup=cancel_button)
+    await States.delete_operation_state.set()
+
+
+def register_delete_operation_press_button(dp: Dispatcher):
+    dp.register_callback_query_handler(press_button_delete_operation, text='delete_operation',
+                                       state=[None, States.category_menu])
+
+
+async def delete_operation(message: Message, state: FSMContext):
+    user_id = message.from_user.id
+    serial_number = message.text
+
+    async with state.proxy() as data:
+        last_operations = data['last_operations']
+
+    if not serial_number.isdigit() or int(serial_number) < 1 or int(serial_number) > len(last_operations):
+        await message.answer(f'⚠ Данные введены некорректно!\n\n'
+                             f'Неверно указан порядковый номер операции.'
+                             f'Вам необходимо передать число от 1 до {len(last_operations)} включительно.\n'
+                             f'Вы можете узнать порядковый номер операции из сообщения выше.\n\n'
+                             f'Пожалуйста, повторите ввод', reply_markup=cancel_button)
+        return
+
+    async with state.proxy() as data:
+        category_name = data.get('category_name')
+
+    operation_data = get_operation_by_serial_number_from_the_end(user_id, category_name, serial_number)
+    operation = get_text_category_operations([operation_data], serial_number).strip()
+    async with state.proxy() as data:
+        data['operation'] = operation_data
+
+    await message.answer(f'Вы уверены, что хотите удалить операцию\n\n'
+                         f'{operation}\n\n'
+                         f'Отменить удаление будет невозможно', reply_markup=yes_no_keyboard)
+
+    await States.confirm_delete_operation_state.set()
+
+
+def register_delete_operation(dp: Dispatcher):
+    dp.register_message_handler(delete_operation, state=States.delete_operation_state)
+
+
+async def confirm_delete_operation(call: CallbackQuery, state: FSMContext):
+    answer = call.data
+    user_id = call.from_user.id
+
+    if answer == 'no':
+        await call.message.answer('Удаление операции отменено', reply_markup=main_keyboard)
+
+    elif answer == 'yes':
+
+        async with state.proxy() as data:
+            category_name = data['category_name']
+            operation = data['operation']
+
+        delete_operation_from_db(user_id, category_name, operation)
+        await call.message.answer('Сессия была удалена', reply_markup=main_keyboard)
+
+    await call.message.delete()
+    await state.reset_state()
+
+
+def register_confirm_delete_operation(dp: Dispatcher):
+    dp.register_callback_query_handler(confirm_delete_operation, state=States.confirm_delete_operation_state)
 
 
 async def edit_category(call: CallbackQuery, state: FSMContext):
@@ -314,6 +391,9 @@ def register_confirm_delete_category(dp: Dispatcher):
 def register_all_category_edit(dp):
     register_category_inline_button(dp)
     register_see_category_operations(dp)
+    register_delete_operation_press_button(dp)
+    register_delete_operation(dp)
+    register_confirm_delete_operation(dp)
     register_edit_category(dp)
     register_confirm_changing_time(dp)
     register_change_time(dp)

@@ -3,14 +3,12 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, ReplyKeyboardRemove
 
-from tgbot.handlers.timer import stop_button
-from tgbot.keyboards.inline import no_add_inline_button, generate_category_keyboard
+from tgbot.keyboards.inline import generate_category_keyboard
 from tgbot.keyboards.reply import main_keyboard
-from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db
 
 
-async def cancel_button(message: Message, state: FSMContext):
+async def press_cancel_button(message: Message, state: FSMContext):
     """Обработка нажатия на кнопку отмены"""
 
     async with state.proxy() as data:
@@ -33,4 +31,4 @@ async def cancel_button(message: Message, state: FSMContext):
 
 def register_cancel_button(dp: Dispatcher):
     """Регистрация обработчика кнопки отмена"""
-    dp.register_message_handler(cancel_button, Text('↩ Отмена'), state='*')
+    dp.register_message_handler(press_cancel_button, Text('↩ Отмена'), state='*')

@@ -1,7 +1,4 @@
-from datetime import date, datetime
-
-import matplotlib
-import pylab
+from datetime import datetime
 
 from tgbot.misc.work_with_json import get_user_from_json_db
 import matplotlib.pyplot as plt

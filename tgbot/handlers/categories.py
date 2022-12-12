@@ -38,7 +38,7 @@ def register_my_categories_button(dp: Dispatcher):
                                 state=[None, States.my_categories, States.category_menu])
 
 
-async def add_new_category(call: CallbackQuery, state: FSMContext):
+async def add_new_category(call: CallbackQuery):
     """Обработка кнопки НОВАЯ КАТЕГОРИЯ"""
     await call.message.delete()
     await call.answer(cache_time=60)

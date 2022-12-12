@@ -1,4 +1,5 @@
 from tgbot.misc.analytics import get_total_analytics
+from tgbot.misc.work_with_json import fill_all_categories_past_date
 
 
 def is_valid_time(str_time, for_edit_time=False):
@@ -144,9 +145,22 @@ def get_word_end_rp(minutes: int):
         return ends.get(str_number[-1])
 
 
-def get_text_category_operations(operations):
-    text = 'Все операции этой категории:\n\n'
+def get_text_category_operations(operations, serial_number=None):
+    if serial_number:
+        operation = operations[0]
 
+        seconds = operation.get("seconds")
+        date = operation.get('date')
+
+        if operation.get('start') is None:
+            return f'{serial_number}. ✋ Добавлено вручную {convert_to_preferred_format(seconds)}\n' \
+                   f'Дата: {date}\n\n'
+
+        else:
+            return f'{serial_number}. ⏱ Добавлено через таймер {convert_to_preferred_format(operation.get("seconds"))}\n' \
+                   f'Дата: {operation.get("end")}\n\n'
+
+    text = 'Все операции этой категории:\n\n'
     for counter, operation in enumerate(operations[-10:], start=1):
 
         seconds = operation.get("seconds")
