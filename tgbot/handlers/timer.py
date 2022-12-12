@@ -125,18 +125,6 @@ async def add_time_to_category(call: CallbackQuery, state: FSMContext):
                 time_in_seconds = get_the_time_in_seconds(data['last_time'])
                 category['seconds'] += time_in_seconds
 
-                day_index = data['day_index']
-
-                days = {0: 'monday',
-                        1: 'tuesday',
-                        2: 'wednesday',
-                        3: 'thursday',
-                        4: 'friday',
-                        5: 'saturday',
-                        6: 'sunday'}
-
-                category[days[day_index]] += time_in_seconds
-
                 date_now = str(datetime.now()).split()[0]
                 start = str(data.get('last_start'))
                 end = str(data.get('end_time'))

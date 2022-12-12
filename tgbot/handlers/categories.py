@@ -95,13 +95,6 @@ async def save_based_minutes_new_category(message: Message, state: FSMContext):
     async with state.proxy() as data:
         data['suspect_category']['based_seconds'] = int(seconds)
         data['suspect_category']['seconds'] = int(seconds)
-        data['suspect_category']['monday'] = 0
-        data['suspect_category']['tuesday'] = 0
-        data['suspect_category']['wednesday'] = 0
-        data['suspect_category']['thursday'] = 0
-        data['suspect_category']['friday'] = 0
-        data['suspect_category']['saturday'] = 0
-        data['suspect_category']['sunday'] = 0
         data['suspect_category']['operations'] = []
 
     async with state.proxy() as data:
@@ -148,17 +141,6 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
                 old_time = int(user['categories'][-1]['based_seconds'])
 
                 user['categories'][-1]['seconds'] = old_time + new_time
-
-                day_index = data['day_index']
-                days = {0: 'monday',
-                        1: 'tuesday',
-                        2: 'wednesday',
-                        3: 'thursday',
-                        4: 'friday',
-                        5: 'saturday',
-                        6: 'sunday'}
-
-                user['categories'][-1][days[day_index]] = new_time
 
                 date_now = str(datetime.now()).split()[0]
                 start = str(data.get('last_start'))
