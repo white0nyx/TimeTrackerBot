@@ -147,7 +147,7 @@ def get_word_end_rp(minutes: int):
 def get_text_category_operations(operations):
     text = 'Все операции этой категории:\n\n'
 
-    for counter, operation in enumerate(operations[-11:], start=1):
+    for counter, operation in enumerate(operations[-10:], start=1):
 
         seconds = operation.get("seconds")
         date = operation.get('date')
