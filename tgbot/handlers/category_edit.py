@@ -34,10 +34,12 @@ async def category_inline_button(call: CallbackQuery):
 
 
 def register_category_inline_button(dp: Dispatcher):
+    """Регистрация обработчика нажатия на Inline-кнопку категории"""
     dp.register_callback_query_handler(category_inline_button, state=[None, States.my_categories])
 
 
 async def see_category_operations(call: CallbackQuery, state: FSMContext):
+    """Обработка нажатия на кнопку 'Посмотреть сессии'"""
     await call.answer(cache_time=10)
     user_id = call.from_user.id
     category_name = call.message.text.split('\n\n')[0]
@@ -57,22 +59,26 @@ async def see_category_operations(call: CallbackQuery, state: FSMContext):
 
 
 def register_see_category_operations(dp: Dispatcher):
+    """Регистрация обработчика нажатия на кнопку 'Посмотреть сессии'"""
     dp.register_callback_query_handler(see_category_operations, state=[States.category_menu],
                                        text='category_operations')
 
 
 async def press_button_delete_operation(call: CallbackQuery):
+    """Обработка нажатия на кнопку 'Удалить операцию'"""
     await call.answer(cache_time=10)
     await call.message.answer('Для удаления операции введите её порядковый номер', reply_markup=cancel_button)
     await States.delete_operation_state.set()
 
 
 def register_delete_operation_press_button(dp: Dispatcher):
+    """Регистрация обработчика нажатия на кнопку 'Удалить операцию'"""
     dp.register_callback_query_handler(press_button_delete_operation, text='delete_operation',
                                        state=[None, States.category_menu])
 
 
-async def delete_operation(message: Message, state: FSMContext):
+async def receiving_serial_number_operation_to_delete(message: Message, state: FSMContext):
+    """Обработка получения серийного номера операции"""
     user_id = message.from_user.id
     serial_number = message.text
 
@@ -102,11 +108,13 @@ async def delete_operation(message: Message, state: FSMContext):
     await States.confirm_delete_operation_state.set()
 
 
-def register_delete_operation(dp: Dispatcher):
-    dp.register_message_handler(delete_operation, state=States.delete_operation_state)
+def register_receiving_serial_number_operation_to_delete(dp: Dispatcher):
+    """Регистрация обработчика получения серийного номера операции"""
+    dp.register_message_handler(receiving_serial_number_operation_to_delete, state=States.delete_operation_state)
 
 
 async def confirm_delete_operation(call: CallbackQuery, state: FSMContext):
+    """Обработка подтверждения удаления операции"""
     answer = call.data
     user_id = call.from_user.id
 
@@ -127,10 +135,12 @@ async def confirm_delete_operation(call: CallbackQuery, state: FSMContext):
 
 
 def register_confirm_delete_operation(dp: Dispatcher):
+    """Регистрация обработчика подтверждения удаления операции"""
     dp.register_callback_query_handler(confirm_delete_operation, state=States.confirm_delete_operation_state)
 
 
 async def edit_category(call: CallbackQuery, state: FSMContext):
+    """Обработка нажатия на кнопки редактирования категории и добавления времени"""
     await call.answer(cache_time=10)
     category_title = call.message.text.split('\n')[0]
 
@@ -144,12 +154,14 @@ async def edit_category(call: CallbackQuery, state: FSMContext):
             reply_markup=cancel_button)
         await States.wait_add_time.set()
 
-    elif call.data == 'subtract_time':
-        await call.message.answer(
-            f'Введите время в формате чч:мм:сс, которое вы хотите вычесть из категории {category_title}\n\n'
-            f'Например: 01:20:03 или 1:20:3',
-            reply_markup=cancel_button)
-        await States.wait_sub_time.set()
+    # Эта часть кода теперь не нужна, так как вычитание времени было убрано из возможных операций
+    #
+    # elif call.data == 'subtract_time':
+    #     await call.message.answer(
+    #         f'Введите время в формате чч:мм:сс, которое вы хотите вычесть из категории {category_title}\n\n'
+    #         f'Например: 01:20:03 или 1:20:3',
+    #         reply_markup=cancel_button)
+    #     await States.wait_sub_time.set()
 
     elif call.data == 'change_title':
         await call.message.answer(f'Введите новое название для категории {category_title}',
@@ -163,10 +175,12 @@ async def edit_category(call: CallbackQuery, state: FSMContext):
 
 
 def register_edit_category(dp: Dispatcher):
+    """Обработка нажатия на кнопки редактирования категории и добавления времени"""
     dp.register_callback_query_handler(edit_category, state=[None, States.category_menu])
 
 
-async def confirm_changing_time(message: Message, state: FSMContext):
+async def receiving_time_to_adding_time(message: Message, state: FSMContext):
+    """Обработка получения времени для добавления"""
     str_time = message.text
 
     if is_valid_time(str_time, for_edit_time=True) is not True:
@@ -180,74 +194,47 @@ async def confirm_changing_time(message: Message, state: FSMContext):
 
     time_in_seconds = get_the_time_in_seconds(str_time)
 
-    if await state.get_state() == States.wait_add_time.state:
-        action = 'добавить'
+    check_possible_add_time = possible_add_time(user_id, time_in_seconds, category_title)
+    is_possible_add_time = check_possible_add_time.get('is_possible_add_time')
+    seconds_today = check_possible_add_time.get('seconds_today')
 
-        check_possible_add_time = possible_add_time(user_id, time_in_seconds, category_title)
-        is_possible_add_time = check_possible_add_time.get('is_possible_add_time')
-        seconds_today = check_possible_add_time.get('seconds_today')
+    if not is_possible_add_time:
+        await message.answer('⚠ Данные введены некорректно!\n\n'
+                             f'Вы не можете добавить такое количество времени, '
+                             f'поскольку иначе получится, что за эти сутки вы '
+                             f'уделили этой категории более 24 часов\n\n'
+                             f'Потрачено времени сегодня: {convert_to_preferred_format(seconds_today)}\n'
+                             f'Ещё можно добавить сегодня: {convert_to_preferred_format(86_400 - seconds_today)}',
+                             reply_markup=cancel_button)
+        return
 
-        if not is_possible_add_time:
-            await message.answer('⚠ Данные введены некорректно!\n\n'
-                                 f'Вы не можете добавить такое количество времени, '
-                                 f'поскольку иначе получится, что за эти сутки вы '
-                                 f'уделили этой категории более 24 часов\n\n'
-                                 f'Потрачено времени сегодня: {convert_to_preferred_format(seconds_today)}\n'
-                                 f'Ещё можно добавить сегодня: {convert_to_preferred_format(86_400 - seconds_today)}',
-                                 reply_markup=cancel_button)
-            return
-
-        await States.confirm_add_time.set()
-
-    else:
-        action = 'вычесть'
-
-        check_possible_sub_time = possible_sub_time(user_id, time_in_seconds, category_title)
-        is_possible_sub_time = check_possible_sub_time.get('is_possible_sub_time')
-        seconds_today = check_possible_sub_time.get('seconds_today')
-
-        if not is_possible_sub_time:
-            await message.answer(f'⚠ Данные введены некорректно!\n\n'
-                                 f'Вы не можете вычесть такое количество времени из этой категории, '
-                                 f'поскольку сегодня ещё не потратили столько времени на неё\n\n'
-                                 f'Потрачено времени сегодня: {convert_to_preferred_format(seconds_today)}',
-                                 reply_markup=cancel_button)
-            return
-
-        await States.confirm_sub_time.set()
+    await States.confirm_add_time.set()
 
     async with state.proxy() as data:
         data['time_in_seconds'] = time_in_seconds
 
-    await message.answer(f'Вы хотите {action} {convert_to_preferred_format(time_in_seconds)}?',
+    await message.answer(f'Вы хотите добавить {convert_to_preferred_format(time_in_seconds)}?',
                          reply_markup=yes_no_keyboard)
 
 
-def register_confirm_changing_time(dp: Dispatcher):
-    dp.register_message_handler(confirm_changing_time, state=[States.wait_add_time, States.wait_sub_time])
+def register_receiving_time_to_adding_time(dp: Dispatcher):
+    """Регистрация обработчика получения времени для добавления"""
+    dp.register_message_handler(receiving_time_to_adding_time, state=[States.wait_add_time, States.wait_sub_time])
 
 
-async def change_time(call: CallbackQuery, state: FSMContext):
+async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
     if call.data == 'no':
-
-        if await state.get_state() == States.confirm_add_time.state:
-            action = 'добавление'
-            state_again = States.wait_add_time
-
-        else:
-            action = 'вычитание'
-            state_again = States.wait_sub_time
 
         async with state.proxy() as data:
             time_in_seconds = data.get('time_in_seconds')
+
         await call.message.delete()
-        await call.message.answer(f'Вы отменили {action} {convert_to_preferred_format(time_in_seconds)}! '
+        await call.message.answer(f'Вы отменили добавление {convert_to_preferred_format(time_in_seconds)}! '
                                   f'Введите новое число или нажмите отмену.', reply_markup=cancel_button)
-        await state_again.set()
 
-    else:
+        await States.wait_add_time.set()
 
-        action = 'добавлено' if await state.get_state() == States.confirm_add_time.state else 'вычтено'
+    elif call.data == 'yes':
 
         async with state.proxy() as data:
             category_title = data.get('changing_category')
@@ -258,7 +245,6 @@ async def change_time(call: CallbackQuery, state: FSMContext):
 
         for category in user['categories']:
             if category['name'] == category_title:
-                today = get_day_of_week(call)
 
                 date_now = str(datetime.now()).split()[0]
 
@@ -270,38 +256,28 @@ async def change_time(call: CallbackQuery, state: FSMContext):
                 if empty_day in category['operations']:
                     category['operations'].remove(empty_day)
 
-                if await state.get_state() == States.confirm_add_time.state:
-                    category['seconds'] += time_in_seconds
-                    category[today] += time_in_seconds
+                category['seconds'] += time_in_seconds
 
-                    category['operations'].append({'date': date_now,
-                                                   'start': None,
-                                                   'end': None,
-                                                   'seconds': time_in_seconds})
-
-                else:
-                    category['seconds'] -= time_in_seconds
-                    category[today] -= time_in_seconds
-
-                    category['operations'].append({'date': date_now,
-                                                   'start': None,
-                                                   'end': None,
-                                                   'seconds': 0 - time_in_seconds})
+                category['operations'].append({'date': date_now,
+                                               'start': None,
+                                               'end': None,
+                                               'seconds': time_in_seconds})
 
                 break
 
         update_user_data(user_id, user)
 
         await call.message.delete()
-        await call.message.answer(f'✅ Время {action}!', reply_markup=main_keyboard)
+        await call.message.answer(f'✅ Время добавлено!', reply_markup=main_keyboard)
         await state.reset_state(with_data=True)
 
 
-def register_change_time(dp: Dispatcher):
-    dp.register_callback_query_handler(change_time, state=[States.confirm_add_time, States.confirm_sub_time])
+def register_confirm_adding_time(dp: Dispatcher):
+    dp.register_callback_query_handler(confirm_adding_time, state=[States.confirm_add_time, States.confirm_sub_time])
 
 
 async def ask_category_title(message: Message, state: FSMContext):
+    """Обработка получения нового названия для категории"""
     new_title = message.text
 
     if len(new_title) > 32:
@@ -320,10 +296,12 @@ async def ask_category_title(message: Message, state: FSMContext):
 
 
 def register_ask_category_title(dp: Dispatcher):
+    """Регистрация обработчика получения нового названия для категории"""
     dp.register_message_handler(ask_category_title, state=[States.wait_new_title])
 
 
 async def confirm_new_category_title(call: CallbackQuery, state: FSMContext):
+    """Обработка подтверждения нового названия для категории"""
     await call.answer(cache_time=10)
 
     if call.data == 'no':
@@ -331,7 +309,7 @@ async def confirm_new_category_title(call: CallbackQuery, state: FSMContext):
         await call.message.answer('Введите другое название или воспользуйтесь отменой', reply_markup=cancel_button)
         await States.wait_new_title.set()
 
-    else:
+    elif call.data == 'yes':
 
         async with state.proxy() as data:
             new_category_title = data['new_category_title']
@@ -353,10 +331,12 @@ async def confirm_new_category_title(call: CallbackQuery, state: FSMContext):
 
 
 def register_confirm_new_category_title(dp: Dispatcher):
+    """Регистрация обработчика подтверждения нового названия для категории"""
     dp.register_callback_query_handler(confirm_new_category_title, state=States.confirm_new_title)
 
 
 async def confirm_delete_category(call: CallbackQuery, state: FSMContext):
+    """Обработка подтверждения удаления категории"""
     await call.answer(cache_time=10)
 
     if call.data == 'no':
@@ -385,18 +365,20 @@ async def confirm_delete_category(call: CallbackQuery, state: FSMContext):
 
 
 def register_confirm_delete_category(dp: Dispatcher):
+    """Регистрация обработчика подтверждения удаления категории"""
     dp.register_callback_query_handler(confirm_delete_category, state=States.confirm_delete_category)
 
 
 def register_all_category_edit(dp):
+    """Регистрация всех обработчиков связанных с редактированием категории"""
     register_category_inline_button(dp)
     register_see_category_operations(dp)
     register_delete_operation_press_button(dp)
-    register_delete_operation(dp)
+    register_receiving_serial_number_operation_to_delete(dp)
     register_confirm_delete_operation(dp)
     register_edit_category(dp)
-    register_confirm_changing_time(dp)
-    register_change_time(dp)
+    register_receiving_time_to_adding_time(dp)
+    register_confirm_adding_time(dp)
     register_ask_category_title(dp)
     register_confirm_new_category_title(dp)
     register_confirm_delete_category(dp)
