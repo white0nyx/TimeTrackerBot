@@ -9,7 +9,7 @@ from tgbot.keyboards.inline import yes_no_keyboard, generate_category_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
-from tgbot.misc.work_with_text import get_the_time_in_seconds, is_valid_time, convert_to_preferred_format
+from tgbot.misc.work_with_text import get_the_time_in_seconds, is_valid_time, get_time_in_str_text
 
 
 async def my_categories_button(message: Message):
@@ -100,7 +100,7 @@ async def save_based_minutes_new_category(message: Message, state: FSMContext):
     async with state.proxy() as data:
         category_name = data['suspect_category']['name']
         category_seconds = data['suspect_category']['based_seconds']
-        category_time = convert_to_preferred_format(category_seconds)
+        category_time = get_time_in_str_text(category_seconds)
 
     await message.answer(f'Подтвердите введённые данные: \n\n'
                          f'Категория: {category_name}\n'

@@ -10,7 +10,7 @@ from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
     possible_add_time, get_operation_by_serial_number_from_the_end, \
     get_all_not_none_category_operations, delete_operation_from_db
-from tgbot.misc.work_with_text import get_category_info_message, convert_to_preferred_format, is_valid_time, \
+from tgbot.misc.work_with_text import get_category_info_message, get_time_in_str_text, is_valid_time, \
     get_the_time_in_seconds, get_text_category_operations
 
 
@@ -193,8 +193,8 @@ async def receiving_time_to_adding_time(message: Message, state: FSMContext):
                              f'Вы не можете добавить такое количество времени, '
                              f'поскольку иначе получится, что за эти сутки вы '
                              f'уделили этой категории более 24 часов\n\n'
-                             f'Потрачено времени сегодня: {convert_to_preferred_format(seconds_today)}\n'
-                             f'Ещё можно добавить сегодня: {convert_to_preferred_format(86_400 - seconds_today)}',
+                             f'Потрачено времени сегодня: {get_time_in_str_text(seconds_today)}\n'
+                             f'Ещё можно добавить сегодня: {get_time_in_str_text(86_400 - seconds_today)}',
                              reply_markup=cancel_button)
         return
 
@@ -203,7 +203,7 @@ async def receiving_time_to_adding_time(message: Message, state: FSMContext):
     async with state.proxy() as data:
         data['time_in_seconds'] = time_in_seconds
 
-    await message.answer(f'Вы хотите добавить {convert_to_preferred_format(time_in_seconds)}?',
+    await message.answer(f'Вы хотите добавить {get_time_in_str_text(time_in_seconds)}?',
                          reply_markup=yes_no_keyboard)
 
 
@@ -220,7 +220,7 @@ async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
             time_in_seconds = data.get('time_in_seconds')
 
         await call.message.delete()
-        await call.message.answer(f'Вы отменили добавление {convert_to_preferred_format(time_in_seconds)}! '
+        await call.message.answer(f'Вы отменили добавление {get_time_in_str_text(time_in_seconds)}! '
                                   f'Введите новое число или нажмите отмену.', reply_markup=cancel_button)
 
         await States.wait_add_time.set()
