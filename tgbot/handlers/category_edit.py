@@ -7,9 +7,8 @@ from aiogram.types import CallbackQuery, Message
 from tgbot.keyboards.inline import category_buttons, yes_no_keyboard, delete_operation_inline_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
-from tgbot.misc.work_with_date import get_day_of_week
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
-    possible_add_time, possible_sub_time, get_operation_by_serial_number_from_the_end, \
+    possible_add_time, get_operation_by_serial_number_from_the_end, \
     get_all_not_none_category_operations, delete_operation_from_db
 from tgbot.misc.work_with_text import get_category_info_message, convert_to_preferred_format, is_valid_time, \
     get_the_time_in_seconds, get_text_category_operations
@@ -154,15 +153,6 @@ async def edit_category(call: CallbackQuery, state: FSMContext):
             reply_markup=cancel_button)
         await States.wait_add_time.set()
 
-    # Эта часть кода теперь не нужна, так как вычитание времени было убрано из возможных операций
-    #
-    # elif call.data == 'subtract_time':
-    #     await call.message.answer(
-    #         f'Введите время в формате чч:мм:сс, которое вы хотите вычесть из категории {category_title}\n\n'
-    #         f'Например: 01:20:03 или 1:20:3',
-    #         reply_markup=cancel_button)
-    #     await States.wait_sub_time.set()
-
     elif call.data == 'change_title':
         await call.message.answer(f'Введите новое название для категории {category_title}',
                                   reply_markup=cancel_button)
@@ -223,6 +213,7 @@ def register_receiving_time_to_adding_time(dp: Dispatcher):
 
 
 async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
+    """Обработка подтверждения добавления времени"""
     if call.data == 'no':
 
         async with state.proxy() as data:
