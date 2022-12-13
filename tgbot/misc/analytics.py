@@ -8,6 +8,7 @@ import numpy as np
 
 
 def get_total_analytics(user_id):
+    """Получение общей статистики"""
     user = get_user_from_json_db(user_id)
     categories = user.get('categories')
     member_since = user.get('user_data').get('member_since')
@@ -46,6 +47,7 @@ def get_total_analytics(user_id):
 
 
 def get_dict_data_all_seconds(user_id):
+    """Получение словаря, где ключ - день, значение - потраченное время в секундах в этот день"""
     with open('data/users.json', 'r', encoding='utf-8') as file:
         user = json.load(file).get(str(user_id))
 
@@ -73,6 +75,7 @@ def get_dict_data_all_seconds(user_id):
 
 
 def get_plot_total_time(user_id):
+    """Построение графика изменения общего времени"""
     data_dict = get_dict_data_all_seconds(user_id)
     days = list(data_dict.keys())
     seconds = data_dict.values()
@@ -102,8 +105,17 @@ def get_plot_total_time(user_id):
 
 
 def get_statistic_by_day_of_week(user_id):
+    """Получение словаря, который хранит часы и сессии для каждого дня недели"""
     user = get_user_from_json_db(user_id)
     categories = user.get('categories')
+
+    days = {0: 'monday',
+            1: 'tuesday',
+            2: 'wednesday',
+            3: 'thursday',
+            4: 'friday',
+            5: 'saturday',
+            6: 'sunday'}
 
     days_and_sessions = {'monday': {'hours': 0, 'sessions': 0},
                          'tuesday': {'hours': 0, 'sessions': 0},
@@ -117,14 +129,6 @@ def get_statistic_by_day_of_week(user_id):
 
     for date, hours in dict_data_all_seconds.items():
         year, month, day = map(int, date.split('-'))
-
-        days = {0: 'monday',
-                1: 'tuesday',
-                2: 'wednesday',
-                3: 'thursday',
-                4: 'friday',
-                5: 'saturday',
-                6: 'sunday'}
 
         day_of_week = days[datetime(year, month, day).weekday()]
 
@@ -140,14 +144,6 @@ def get_statistic_by_day_of_week(user_id):
 
             year, month, day = map(int, date.split('-'))
 
-            days = {0: 'monday',
-                    1: 'tuesday',
-                    2: 'wednesday',
-                    3: 'thursday',
-                    4: 'friday',
-                    5: 'saturday',
-                    6: 'sunday'}
-
             day_of_week = days[datetime(year, month, day).weekday()]
             if seconds > 0:
                 days_and_sessions[day_of_week]['sessions'] += 1
@@ -156,6 +152,7 @@ def get_statistic_by_day_of_week(user_id):
 
 
 def get_diagram_week_statistic(user_id):
+    """Получение диаграммы, которая отображает количество часов и сессий на каждый день недели"""
     days_and_sessions = get_statistic_by_day_of_week(user_id)
 
     days_of_week = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
@@ -185,6 +182,7 @@ def get_diagram_week_statistic(user_id):
 
 
 def get_duration_sessions_data(user_id):
+    """Получение словаря, где ключ - длина сессий, значение - количество сессий такой длины"""
     sessions_durations = {'< 30 минут': 0, '30-60 минут': 0, '1-2 часа': 0, '2-4 часа': 0, '4+ часа': 0}
 
     user = get_user_from_json_db(user_id)
@@ -218,6 +216,7 @@ def get_duration_sessions_data(user_id):
 
 
 def get_circle_diagram_sessions_durations(user_id):
+    """Получение круговой диаграммы, отображающей статистику по длинам сессий"""
     sessions_durations_data = get_duration_sessions_data(user_id)
     clear_sessions_durations_data = {}
 
@@ -239,6 +238,7 @@ def get_circle_diagram_sessions_durations(user_id):
 
 
 def is_possible_get_circle_diagram_sessions_durations(user_id):
+    """Проверка возможности создать круговую диаграмму"""
     sessions_durations_data = get_duration_sessions_data(user_id)
     values = tuple(sessions_durations_data.values())
     return not values[0] == values[1] == values[2] == values[3] == values[4] == 0
