@@ -209,7 +209,7 @@ async def receiving_time_to_adding_time(message: Message, state: FSMContext):
 
 def register_receiving_time_to_adding_time(dp: Dispatcher):
     """Регистрация обработчика получения времени для добавления"""
-    dp.register_message_handler(receiving_time_to_adding_time, state=[States.wait_add_time, States.wait_sub_time])
+    dp.register_message_handler(receiving_time_to_adding_time, state=[States.wait_add_time])
 
 
 async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
@@ -265,7 +265,7 @@ async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
 
 def register_confirm_adding_time(dp: Dispatcher):
     """Регистрация обработчика подтверждения добавления времени"""
-    dp.register_callback_query_handler(confirm_adding_time, state=[States.confirm_add_time, States.confirm_sub_time])
+    dp.register_callback_query_handler(confirm_adding_time, state=[States.confirm_add_time])
 
 
 async def ask_category_title(message: Message, state: FSMContext):

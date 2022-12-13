@@ -26,10 +26,6 @@ class States(StatesGroup):
     wait_add_time = State()
     confirm_add_time = State()
 
-    # Ожидание и подтверждение времени для вычитания
-    wait_sub_time = State()
-    confirm_sub_time = State()
-
     # Ожидание и подтверждение нового названия
     wait_new_title = State()
     confirm_new_title = State()
