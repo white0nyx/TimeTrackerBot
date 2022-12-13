@@ -33,7 +33,8 @@ def generate_category_keyboard(categories=(), no_add_button=False):
     return keyboard
 
 
-category_buttons = InlineKeyboardMarkup(inline_keyboard=[
+# Клавиатура меню категории
+category_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='👀 Посмотреть сессии', callback_data='category_operations')
     ],
@@ -48,12 +49,14 @@ category_buttons = InlineKeyboardMarkup(inline_keyboard=[
     ],
 ])
 
+# Кнопка Не добавлять
 no_add_inline_button = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='Не добавлять', callback_data='no_add')
     ]
 ])
 
+# Кнопка Удалить операцию
 delete_operation_inline_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='🗑 Удалить операцию', callback_data='delete_operation')

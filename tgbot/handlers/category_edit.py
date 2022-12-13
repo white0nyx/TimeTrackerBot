@@ -4,7 +4,7 @@ from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from tgbot.keyboards.inline import category_buttons, yes_no_keyboard, delete_operation_inline_keyboard
+from tgbot.keyboards.inline import category_menu_keyboard, yes_no_keyboard, delete_operation_inline_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
@@ -27,7 +27,7 @@ async def category_inline_button(call: CallbackQuery):
 
     text = get_category_info_message(callback_data, categories)
     await call.message.delete()
-    await call.message.answer(text=text, reply_markup=category_buttons)
+    await call.message.answer(text=text, reply_markup=category_menu_keyboard)
 
     await States.category_menu.set()
 
