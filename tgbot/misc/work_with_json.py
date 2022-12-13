@@ -3,11 +3,13 @@ from datetime import datetime
 
 
 def get_user_from_json_db(user_id):
+    """Получения данных пользователя из БД"""
     with open('data/users.json', 'r', encoding='utf-8') as db:
         return json.load(db).get(str(user_id))
 
 
 def update_user_data(user_id, new_data):
+    """Обновление данных пользователя В БД"""
     with open('data/users.json', 'r', encoding='utf-8') as db:
         old_users_data = json.load(db)
 
@@ -18,6 +20,7 @@ def update_user_data(user_id, new_data):
 
 
 def fill_past_date(user_id, callback_data):
+    """Заполнение дней, в которые бот не использовался, пустыми датами"""
     date = str(datetime.now()).split()[0]
 
     days_in_month = {
@@ -91,6 +94,7 @@ def fill_past_date(user_id, callback_data):
 
 
 def fill_all_categories_past_date(user_id):
+    """Применение функции fill_past_date ко всем категориям"""
     user = get_user_from_json_db(user_id)
     categories = user['categories']
 
@@ -101,6 +105,7 @@ def fill_all_categories_past_date(user_id):
 
 
 def possible_add_time(user_id, time_in_seconds, category_name):
+    """Проверка на возможность добавить время"""
     user = get_user_from_json_db(user_id)
 
     categories = user.get('categories')
@@ -113,20 +118,8 @@ def possible_add_time(user_id, time_in_seconds, category_name):
                     'seconds_today': seconds_today}
 
 
-def possible_sub_time(user_id, time_in_seconds, category_name):
-    user = get_user_from_json_db(user_id)
-
-    categories = user.get('categories')
-
-    for category in categories:
-        if category['name'] == category_name:
-            operations = category['operations']
-            seconds_today = get_total_sec_today(operations)
-            return {'is_possible_sub_time': seconds_today - time_in_seconds >= 0,
-                    'seconds_today': seconds_today}
-
-
 def get_all_dates_operations(operations):
+    """Получить все даты операций"""
     dates = []
     for operation in operations:
         dates.append(operation['date'])
@@ -135,6 +128,7 @@ def get_all_dates_operations(operations):
 
 
 def get_total_sec_today(operations):
+    """Получить общее время в секундах"""
     today = str(datetime.now()).split()[0]
     last_operation_data = '3000-01-01'
 
@@ -155,6 +149,7 @@ def get_total_sec_today(operations):
 
 
 def get_all_not_none_category_operations(user_id, category_name):
+    """Получить все не пустые операции"""
     user = get_user_from_json_db(user_id)
 
     not_none_operations = []
@@ -169,6 +164,7 @@ def get_all_not_none_category_operations(user_id, category_name):
 
 
 def get_operation_by_serial_number_from_the_end(user_id, category_name, serial_number_of_operation):
+    """Получить операцию по серийному номеру"""
     operations = get_all_not_none_category_operations(user_id, category_name)
 
     index = int(serial_number_of_operation) - 1
@@ -179,6 +175,7 @@ def get_operation_by_serial_number_from_the_end(user_id, category_name, serial_n
 
 
 def delete_operation_from_db(user_id, category_name, operation):
+    """Удаление операции из БД"""
     user = get_user_from_json_db(user_id)
     categories = user['categories']
 
