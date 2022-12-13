@@ -264,6 +264,7 @@ async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
 
 
 def register_confirm_adding_time(dp: Dispatcher):
+    """Регистрация обработчика подтверждения добавления времени"""
     dp.register_callback_query_handler(confirm_adding_time, state=[States.confirm_add_time, States.confirm_sub_time])
 
 

@@ -70,24 +70,27 @@ async def stop_button(call: CallbackQuery, state: FSMContext):
 
 
 def register_stop_button(dp: Dispatcher):
+    """Регистрация обработчика кнопки СТОП"""
     dp.register_callback_query_handler(stop_button, text='stop',
                                        state=[None, States.my_categories, States.category_menu])
 
 
-async def no_add_button(call: CallbackQuery):
-
+async def no_add_time_button(call: CallbackQuery):
+    """Обработка нажатия на кнопку отказа добавлять время (Кнопка НЕТ)"""
     await call.message.delete()
     await call.message.answer('Вы уверенны, что не хотите добавлять время к категории?',
                               reply_markup=yes_no_keyboard)
 
 
-def register_no_add_button(dp: Dispatcher):
-    dp.register_callback_query_handler(no_add_button, state=[States.add_time_to_category,
-                                                             States.add_new_category_name,
-                                                             States.add_new_category_based_seconds], text='no_add')
+def register_no_add_time_button(dp: Dispatcher):
+    """Регистрация обработчика нажатия на кнопку отказа добавлять время"""
+    dp.register_callback_query_handler(no_add_time_button, state=[States.add_time_to_category,
+                                                                  States.add_new_category_name,
+                                                                  States.add_new_category_based_seconds], text='no_add')
 
 
 async def confirm_no_add(call: CallbackQuery, state: FSMContext):
+    """Обработка подтверждения отказа добавлять время"""
     async with state.proxy() as data:
         time = data['last_time']
 
@@ -103,6 +106,7 @@ async def confirm_no_add(call: CallbackQuery, state: FSMContext):
 
 
 def register_register_no_add_button(dp: Dispatcher):
+    """Регистрация обработчика подтверждения отказа добавлять время"""
     dp.register_callback_query_handler(confirm_no_add,
                                        state=[States.add_time_to_category,
                                               States.add_new_category_name,
@@ -111,39 +115,42 @@ def register_register_no_add_button(dp: Dispatcher):
 
 
 async def add_time_to_category(call: CallbackQuery, state: FSMContext):
+    """Обработка нажатия на кнопку согласия добавления времени (Кнопка ДА)"""
     callback_data = call.data
     async with state.proxy() as data:
+        state_data = data
 
-        user_id = call.from_user.id
-        user = get_user_from_json_db(user_id)
+    user_id = call.from_user.id
+    user = get_user_from_json_db(user_id)
 
-        time = data['last_time']
+    time = state_data['last_time']
 
-        for category in user['categories']:
-            if callback_data in category.values():
-                category_name = category['name']
-                time_in_seconds = get_the_time_in_seconds(data['last_time'])
-                category['seconds'] += time_in_seconds
+    category_name = None
+    for category in user['categories']:
+        if callback_data in category.values():
+            category_name = category['name']
+            time_in_seconds = get_the_time_in_seconds(state_data['last_time'])
+            category['seconds'] += time_in_seconds
 
-                date_now = str(datetime.now()).split()[0]
-                start = str(data.get('last_start'))
-                end = str(data.get('end_time'))
-                seconds = get_the_time_in_seconds(data.get('last_time'))
+            date_now = str(datetime.now()).split()[0]
+            start = str(state_data.get('last_start'))
+            end = str(state_data.get('end_time'))
+            seconds = get_the_time_in_seconds(state_data.get('last_time'))
 
-                empty_day = {'date': date_now,
-                             'start': None,
-                             'end': None,
-                             'seconds': None}
+            empty_day = {'date': date_now,
+                         'start': None,
+                         'end': None,
+                         'seconds': None}
 
-                if empty_day in category['operations']:
-                    category['operations'].remove(empty_day)
+            if empty_day in category['operations']:
+                category['operations'].remove(empty_day)
 
-                category['operations'].append({'date': date_now,
-                                               'start': start,
-                                               'end': end,
-                                               'seconds': seconds})
+            category['operations'].append({'date': date_now,
+                                           'start': start,
+                                           'end': end,
+                                           'seconds': seconds})
 
-        update_user_data(user_id, user)
+    update_user_data(user_id, user)
 
     await state.reset_state(with_data=True)
     await call.answer(cache_time=30)
@@ -154,14 +161,16 @@ async def add_time_to_category(call: CallbackQuery, state: FSMContext):
 
 
 def register_add_time_to_category(dp: Dispatcher):
+    """Регистрация обработчика нажатия на кнопку согласия добавления времени"""
     dp.register_callback_query_handler(add_time_to_category, Text(startswith='category_'),
                                        state=[States.add_time_to_category, States.add_new_category_name,
                                               States.add_new_category_based_seconds])
 
 
 def register_all_timer(dp):
+    """Регистрация всех обработчиков связанных с таймером"""
     register_start_button(dp)
     register_stop_button(dp)
-    register_no_add_button(dp)
+    register_no_add_time_button(dp)
     register_register_no_add_button(dp)
     register_add_time_to_category(dp)

@@ -12,6 +12,7 @@ from tgbot.misc.work_with_text import get_statistic
 
 
 async def statistic_button(message: Message):
+    """Обработка нажатия на кнопку Статистика"""
     user_id = message.from_user.id
 
     fill_all_categories_past_date(user_id)
@@ -52,9 +53,11 @@ async def statistic_button(message: Message):
 
 
 def register_statistic_button(dp: Dispatcher):
+    """Регистрация обработчика нажатия на кнопку Статистика"""
     dp.register_message_handler(statistic_button, Text('📊 Статистика'),
                                 state=[None, States.my_categories, States.category_menu])
 
 
 def register_all_statistic(dp):
+    """Регистрация всех обработчиков связанных со статистикой"""
     register_statistic_button(dp)
