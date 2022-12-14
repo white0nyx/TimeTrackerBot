@@ -238,6 +238,7 @@ async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
             if category['name'] == category_title:
 
                 date_now = str(datetime.now()).split()[0]
+                time_start = str(datetime.now()).split()[-1].split('.')[0]
 
                 empty_day = {'date': date_now,
                              'start': None,
@@ -250,7 +251,7 @@ async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
                 category['seconds'] += time_in_seconds
 
                 category['operations'].append({'date': date_now,
-                                               'start': None,
+                                               'start': time_start,
                                                'end': None,
                                                'seconds': time_in_seconds})
 
