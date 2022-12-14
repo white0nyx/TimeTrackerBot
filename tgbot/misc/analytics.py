@@ -14,6 +14,7 @@ def get_total_analytics(user_id):
     member_since = user.get('user_data').get('member_since')
 
     total_time = 0
+    time_before_bot = 0
     total_hours_without_based_seconds = 0
     total_operations = 0
     total_all_days = []
@@ -21,6 +22,7 @@ def get_total_analytics(user_id):
     for category in categories:
         seconds = category['seconds']
         total_time += seconds
+        time_before_bot += category['based_seconds']
         total_seconds_without_based_seconds = seconds - category['based_seconds']
         total_hours_without_based_seconds += total_seconds_without_based_seconds
         operations = category['operations']
@@ -38,7 +40,11 @@ def get_total_analytics(user_id):
 
     average_time_in_category = int(total_hours_without_based_seconds / count_categories)
 
+    time_after_bot = total_time - time_before_bot
+
     return {'total_time': total_time,
+            'time_before_bot': time_before_bot,
+            'time_after_bot': time_after_bot,
             'total_sessions': total_operations,
             'time_per_day': time_per_day,
             'average_time_in_category': average_time_in_category,

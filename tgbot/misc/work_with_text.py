@@ -70,22 +70,24 @@ def get_statistic(user_id, categories):
 
     user_statistic = get_total_analytics(user_id)
     total_time = get_time_in_str_text(user_statistic.get('total_time'))
+    time_before_bot = get_time_in_str_text(user_statistic.get('time_before_bot'))
+    time_after_bot = get_time_in_str_text(user_statistic.get('time_after_bot'))
     total_sessions = user_statistic.get('total_sessions')
     time_per_day = get_time_in_str_text(user_statistic.get('time_per_day'))
     average_time_in_category = get_time_in_str_text(user_statistic.get('average_time_in_category'))
     count_categories = user_statistic.get('count_categories')
-    member_since = user_statistic.get('member_since')
+    member_since = user_statistic.get('member_since').split()[0]
 
     text += f'Потрачено времени: {total_time}\n' \
-            f'Количество операций: {total_sessions}\n\n' \
+            f'До запуска бота: {time_before_bot}\n' \
+            f'После запуска бота: {time_after_bot}\n\n' \
+            f'Количество сессий: {total_sessions}\n\n' \
             f'Время в день: {time_per_day}\n' \
             f'Время на категорию: {average_time_in_category}\n\n' \
             f'Количество категорий: {count_categories}\n\n'
 
     for category in categories:
-        operations = category.get('operations')
-        count_sessions = len([x for x in operations if x.get('seconds') is not None and x.get('seconds') > 0])
-        text += f'{category["name"]} - {get_time_in_str_text(category["seconds"])} - {count_sessions}\n'
+        text += f'{category["name"]} - {get_time_in_str_text(category["seconds"])}\n'
 
     text += f'\n👤 Подписчик с {member_since}\n\n'
 
