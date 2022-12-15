@@ -44,12 +44,13 @@ async def see_category_operations(call: CallbackQuery, state: FSMContext):
     category_name = call.message.text.split('\n\n')[0]
 
     operations = get_all_not_none_category_operations(user_id, category_name)
-    text = get_text_category_operations(operations)
+    text = get_text_category_operations(operations, category_name)
 
     if len(operations) == 0:
-        await call.message.answer('У вас пока нет ни одной операции в данной категории')
+        await call.message.answer(f'У вас пока нет ни одной операции в категории\n'
+                                  f'{category_name}')
         return
-    
+
     await call.message.delete()
     async with state.proxy() as data:
         data['category_name'] = category_name
@@ -97,7 +98,7 @@ async def receiving_serial_number_operation_to_delete(message: Message, state: F
         category_name = data.get('category_name')
 
     operation_data = get_operation_by_serial_number_from_the_end(user_id, category_name, serial_number)
-    operation = get_text_category_operations([operation_data], serial_number).strip()
+    operation = get_text_category_operations([operation_data], category_name, serial_number).strip()
     async with state.proxy() as data:
         data['operation'] = operation_data
 

@@ -153,7 +153,7 @@ def get_word_end_rp(minutes: int):
         return ends.get(str_number[-1])
 
 
-def get_text_category_operations(operations, serial_number=None):
+def get_text_category_operations(operations, category_name, serial_number=None):
     """Получение текста для вывода информации о последних 10 операциях"""
     if serial_number:
         operation = operations[0]
@@ -169,7 +169,8 @@ def get_text_category_operations(operations, serial_number=None):
             return f'{serial_number}. ⏱ Добавлено через таймер {get_time_in_str_text(operation.get("seconds"))}\n' \
                    f'Дата: {operation.get("end")}\n\n'
 
-    text = 'Все операции этой категории:\n\n'
+    text = f'{category_name}\n' \
+           f'Последние операции:\n\n'
     for counter, operation in enumerate(operations[-10:], start=1):
 
         seconds = operation.get("seconds")
