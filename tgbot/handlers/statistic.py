@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, InputFile, MediaGroup
 
 from tgbot.misc.analytics import get_plot_total_time, get_diagram_week_statistic, get_circle_diagram_sessions_durations, \
-    is_possible_get_circle_diagram_sessions_durations
+    is_possible_get_circle_diagram_sessions_durations, get_diagram_by_hours_in_day
 from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, fill_all_categories_past_date
 from tgbot.misc.work_with_text import get_statistic
@@ -44,12 +44,20 @@ async def statistic_button(message: Message):
             path_or_bytesio=f'data/{user_id}_sessions_durations_statistic.png')
         album.attach_photo(circle_diagram_sessions_durations)
 
+    # Диаграмма со статистикой по часам
+    if is_possible_get_circle_diagram_sessions_durations(user_id):
+        get_diagram_by_hours_in_day(str(user_id))
+        sessions_hourse = InputFile(
+            path_or_bytesio=f'data/{user_id}_session_count_by_hour_in_day.png')
+        album.attach_photo(sessions_hourse)
+
     await message.answer_media_group(album)
     os.remove(f'data/{user_id}_total_time.png')
     os.remove(f'data/{user_id}_week_statistic.png')
 
     if is_possible_get_circle_diagram_sessions_durations(user_id):
         os.remove(f'data/{user_id}_sessions_durations_statistic.png')
+        os.remove(f'data/{user_id}_session_count_by_hour_in_day.png')
 
 
 def register_statistic_button(dp: Dispatcher):

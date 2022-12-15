@@ -262,11 +262,53 @@ def get_statistic_by_hours_in_day(user_id):
     for category in categories:
 
         for operation in category['operations']:
-            operation_hour = int(operation.get('start').split(':')[0])
-            hours_in_day[operation_hour] += 1
 
-    print(hours_in_day)
+            hour_start = int(operation.get('start').split(':')[0])
+            hour_end = int(operation.get('end').split(':')[0])
+
+            for operation_hour in get_range_hours(hour_start, hour_end):
+                hours_in_day[operation_hour] += 1
+
     return hours_in_day
 
-if __name__ == '__main__':
-    get_statistic_by_hours_in_day('722858342')
+
+def get_diagram_by_hours_in_day(user_id):
+    hours_in_day = get_statistic_by_hours_in_day(user_id)
+    hours = list(hours_in_day.keys())
+    counts = list(hours_in_day.values())
+
+    x = np.arange(len(hours))
+
+    fig, ax = plt.subplots(figsize=(9, 6))
+    ax.bar(hours, counts)
+
+    plt.xlabel('Время суток')
+    plt.ylabel('Количество сессий')
+
+    ax.set_title('Время, когда вы пользуетесь ботом')
+    ax.set_xticks(x)
+    ax.set_xticklabels(hours)
+
+    plt.savefig(f'data/{user_id}_session_count_by_hour_in_day.png')
+    plt.clf()
+
+
+def get_range_hours(start, stop):
+    result = []
+
+    if stop < start:
+        no_hours = []
+        for i in range(start - 1, stop, -1):
+            no_hours.append(i)
+
+        print(no_hours)
+
+        for i in range(0, 24):
+            if i not in no_hours:
+                result.append(i)
+
+    else:
+        for i in range(start, stop + 1):
+            result.append(i)
+
+    return result
