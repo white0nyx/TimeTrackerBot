@@ -129,6 +129,7 @@ async def confirm_delete_operation(call: CallbackQuery, state: FSMContext):
             operation = data['operation']
 
         delete_operation_from_db(user_id, category_name, operation)
+        fill_all_categories_past_date(user_id)
         await call.message.answer('Сессия была удалена', reply_markup=main_keyboard)
 
     await call.message.delete()
