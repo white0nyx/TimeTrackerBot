@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -237,8 +237,11 @@ async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
         for category in user['categories']:
             if category['name'] == category_title:
 
-                date_now = str(datetime.now()).split()[0]
-                time_start = str(datetime.now()).split()[-1].split('.')[0]
+                date_now = datetime.now()
+                time_start = str(date_now).split()[-1].split('.')[0]
+                time_end = str((date_now + timedelta(0, time_in_seconds))).split()[-1].split('.')[0]
+
+                date_now = str(date_now).split()[0]
 
                 empty_day = {'date': date_now,
                              'start': None,
@@ -252,7 +255,7 @@ async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
 
                 category['operations'].append({'date': date_now,
                                                'start': time_start,
-                                               'end': None,
+                                               'end': time_end,
                                                'seconds': time_in_seconds})
 
                 break

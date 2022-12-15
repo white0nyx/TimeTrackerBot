@@ -248,3 +248,25 @@ def is_possible_get_circle_diagram_sessions_durations(user_id):
     sessions_durations_data = get_duration_sessions_data(user_id)
     values = tuple(sessions_durations_data.values())
     return not values[0] == values[1] == values[2] == values[3] == values[4] == 0
+
+
+def get_statistic_by_hours_in_day(user_id):
+    user = get_user_from_json_db(user_id)
+
+    hours_in_day = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0,
+                    10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0,
+                    20: 0, 21: 0, 22: 0, 23: 0}
+
+    categories = user.get('categories')
+
+    for category in categories:
+
+        for operation in category['operations']:
+            operation_hour = int(operation.get('start').split(':')[0])
+            hours_in_day[operation_hour] += 1
+
+    print(hours_in_day)
+    return hours_in_day
+
+if __name__ == '__main__':
+    get_statistic_by_hours_in_day('722858342')
