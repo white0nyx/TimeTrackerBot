@@ -301,8 +301,6 @@ def get_range_hours(start, stop):
         for i in range(start - 1, stop, -1):
             no_hours.append(i)
 
-        print(no_hours)
-
         for i in range(0, 24):
             if i not in no_hours:
                 result.append(i)
