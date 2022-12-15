@@ -49,7 +49,8 @@ async def see_category_operations(call: CallbackQuery, state: FSMContext):
     if len(operations) == 0:
         await call.message.answer('У вас пока нет ни одной операции в данной категории')
         return
-
+    
+    await call.message.delete()
     async with state.proxy() as data:
         data['category_name'] = category_name
         data['last_operations'] = operations
@@ -141,6 +142,7 @@ def register_confirm_delete_operation(dp: Dispatcher):
 async def edit_category(call: CallbackQuery, state: FSMContext):
     """Обработка нажатия на кнопки редактирования категории и добавления времени"""
     await call.answer(cache_time=10)
+    await call.message.delete()
     category_title = call.message.text.split('\n')[0]
 
     async with state.proxy() as data:
