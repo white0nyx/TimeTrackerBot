@@ -251,6 +251,7 @@ def is_possible_get_circle_diagram_sessions_durations(user_id):
 
 
 def get_statistic_by_hours_in_day(user_id):
+    """Получение статистики по часам"""
     user = get_user_from_json_db(user_id)
 
     hours_in_day = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0,
@@ -273,6 +274,7 @@ def get_statistic_by_hours_in_day(user_id):
 
 
 def get_diagram_by_hours_in_day(user_id):
+    """Получение диаграммы, отображающей статистику по часам"""
     hours_in_day = get_statistic_by_hours_in_day(user_id)
     hours = list(hours_in_day.keys())
     counts = list(hours_in_day.values())
@@ -294,6 +296,7 @@ def get_diagram_by_hours_in_day(user_id):
 
 
 def get_range_hours(start, stop):
+    """Получение промежутка часов"""
     result = []
 
     if stop < start:
