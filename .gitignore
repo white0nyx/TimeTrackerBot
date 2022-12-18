@@ -62,7 +62,8 @@ venv.bak/
 .idea/*
 .env
 
-# Data Folder
+# DB
+data/users.json
 
 # Test-files
 test*.*
