@@ -260,7 +260,8 @@ async def confirm_adding_time(call: CallbackQuery, state: FSMContext):
                 category['operations'].append({'date': date_now,
                                                'start': time_start,
                                                'end': time_end,
-                                               'seconds': time_in_seconds})
+                                               'seconds': time_in_seconds,
+                                               'handmade': True})
 
                 break
 

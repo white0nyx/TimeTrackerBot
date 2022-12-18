@@ -174,32 +174,32 @@ def get_text_category_operations(operations, category_name, serial_number=None):
         operation = operations[0]
 
         seconds = operation.get("seconds")
-        date = operation.get('date')
+        date = f"{operation.get('date')} {operation.get('end')}"
 
-        if operation.get('start') is None:
+        if operation.get('handmade') is True:
             return f'{serial_number}. ✋ Добавлено вручную {get_time_in_str_text(seconds)}\n' \
                    f'Дата: {date}\n\n'
 
         else:
             return f'{serial_number}. ⏱ Добавлено через таймер {get_time_in_str_text(operation.get("seconds"))}\n' \
-                   f'Дата: {operation.get("end")}\n\n'
+                   f'Дата: {date}\n\n'
 
     text = f'{category_name}\n' \
            f'Последние операции:\n\n'
     for counter, operation in enumerate(operations[-10:], start=1):
 
         seconds = operation.get("seconds")
-        date = operation.get('date')
+        date = f"{operation.get('date')} {operation.get('end')}"
 
         if seconds is None:
             continue
 
-        if operation.get('start') is None:
+        if operation.get('handmade') is True:
             text += f'{counter}. ✋ Добавлено вручную {get_time_in_str_text(seconds)}\n' \
                     f'Дата: {date}\n\n'
 
         else:
             text += f'{counter}. ⏱ Добавлено через таймер {get_time_in_str_text(operation.get("seconds"))}\n' \
-                    f'Дата: {operation.get("end")}\n\n'
+                    f'Дата: {date}\n\n'
 
     return text
