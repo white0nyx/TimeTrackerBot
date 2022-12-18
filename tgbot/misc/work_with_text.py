@@ -1,10 +1,25 @@
 from tgbot.misc.analytics import get_total_analytics
 
 
-def is_valid_time(str_time, for_edit_time=False):
+def is_valid_time(str_time: str, for_edit_time=False):
     """Проверка на корректность введённого времени"""
-    if str_time == '0':
-        return True
+    if str_time.isdigit() or str_time.replace('-', '', 1).isdigit():
+
+        if for_edit_time and (1 <= int(str_time) <= 24):
+            return True
+
+        elif for_edit_time and not (1 <= int(str_time) <= 24):
+            return '⚠ Данные введены некорректно!\n\n' \
+                   'Число часов должно находиться в промежутке от 1 до 24 включительно\n' \
+                   'Пожалуйста, повторите ввод'
+
+        elif not for_edit_time and int(str_time) < 0:
+            return '⚠ Данные введены некорректно!\n\n' \
+                   'Число часов должно находиться в промежутке от 1 до 24 включительно\n' \
+                   'Пожалуйста, повторите ввод'
+
+        else:
+            return True
 
     if str_time.count(':') != 2 or not str_time.replace(':', '').isdigit():
         return '⚠ Данные введены некорректно!\n\n' \
@@ -44,8 +59,8 @@ def is_valid_time(str_time, for_edit_time=False):
 
 def get_the_time_in_seconds(str_time: str):
     """Получение времени в секундах из строки чч:мм:сс"""
-    if str_time == '0':
-        return 0
+    if str_time.isdigit() or str_time[1:].isdigit():
+        return int(str_time) * 3600
 
     time_parts = str_time.split(':')
     h, m, s = tuple(map(int, time_parts))

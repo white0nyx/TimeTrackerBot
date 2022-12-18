@@ -264,6 +264,9 @@ def get_statistic_by_hours_in_day(user_id):
 
         for operation in category['operations']:
 
+            if operation.get('start') is None:
+                continue
+
             hour_start = int(operation.get('start').split(':')[0])
             hour_end = int(operation.get('end').split(':')[0])
 
