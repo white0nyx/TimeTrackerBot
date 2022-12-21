@@ -81,7 +81,7 @@ def get_time_in_str_text(sec):
 
 def get_statistic(user_id, categories):
     """Получение текста для отображения статистики"""
-    text = '📈 Ваша общая статистика\n\n'
+    text = '📈 <b>Ваша общая статистика</b>\n\n'
 
     user_statistic = get_total_analytics(user_id)
     total_time = get_time_in_str_text(user_statistic.get('total_time'))
@@ -95,19 +95,19 @@ def get_statistic(user_id, categories):
     count_categories = user_statistic.get('count_categories')
     member_since = user_statistic.get('member_since').split()[0]
 
-    text += f'⏱ Время\n' \
+    text += f'⏱ <u><b>Время</b></u>\n' \
             f'┌Потрачено времени: {total_time}\n' \
             f'├До запуска бота: {time_before_bot}\n' \
             f'└После запуска бота: {time_after_bot}\n\n' \
-            f'🔥 Сессии и серии\n' \
+            f'🔥 <u><b>Сессии и серии</b></u>\n' \
             f'┌Количество сессий: {total_sessions}\n' \
             f'├Текущая серия: {current_series}\n' \
             f'└Максимальная серия: {max_series}\n\n' \
-            f'📊 Аналитика\n' \
+            f'📊 <u><b>Аналитика</b></u>\n' \
             f'┌Время в день: {time_per_day}\n' \
             f'├Время на категорию: {average_time_in_category}\n' \
             f'└Количество категорий: {count_categories}\n\n' \
-            f'📓 Категории\n'
+            f'📓 <u><b>Категории</b></u>\n'
 
     for category in categories:
         text += f'{category["name"]} - {get_time_in_str_text(category["seconds"])}\n'
