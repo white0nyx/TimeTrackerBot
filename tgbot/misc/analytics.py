@@ -108,6 +108,7 @@ def get_plot_total_time(user_id):
     plt.grid()
     plt.savefig(f'data/{user_id}_total_time.png')
     plt.clf()
+    plt.close()
 
 
 def get_statistic_by_day_of_week(user_id):
@@ -185,6 +186,7 @@ def get_diagram_week_statistic(user_id):
     ax.grid()
     plt.savefig(f'data/{user_id}_week_statistic.png')
     plt.clf()
+    plt.close(fig)
 
 
 def get_duration_sessions_data(user_id):
@@ -241,6 +243,7 @@ def get_circle_diagram_sessions_durations(user_id):
 
     plt.savefig(f'data/{user_id}_sessions_durations_statistic.png')
     plt.clf()
+    plt.close(fig)
 
 
 def is_possible_get_circle_diagram_sessions_durations(user_id):
@@ -296,6 +299,7 @@ def get_diagram_by_hours_in_day(user_id):
 
     plt.savefig(f'data/{user_id}_session_count_by_hour_in_day.png')
     plt.clf()
+    plt.close(fig)
 
 
 def get_range_hours(start, stop):
