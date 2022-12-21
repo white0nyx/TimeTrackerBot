@@ -143,8 +143,8 @@ async def confirm_data(call: CallbackQuery, state: FSMContext):
                 user['categories'][-1]['seconds'] = old_time + new_time
 
                 date_now = str(datetime.now()).split()[0]
-                start = str(data.get('last_start'))
-                end = str(data.get('end_time'))
+                start = str(data.get('last_start')).split()[-1]
+                end = str(data.get('end_time')).split()[-1].split('.')[0]
                 seconds = get_the_time_in_seconds(data.get('last_time'))
                 user['categories'][-1]['operations'].append({'date': date_now,
                                                              'start': start,
