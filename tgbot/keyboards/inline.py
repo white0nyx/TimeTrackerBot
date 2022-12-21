@@ -1,8 +1,17 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# Кнопка остановки секундомера
-stop_timer_button = InlineKeyboardMarkup(inline_keyboard=[
+# Клавиатура с паузой и остановкой
+pause_stop_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
+        InlineKeyboardButton(text='⏸ Пауза', callback_data='pause'),
+        InlineKeyboardButton(text='⏹ Стоп', callback_data='stop'),
+    ]
+])
+
+# Клавиатура с продолжением и остановкой
+resume_stop_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    [
+        InlineKeyboardButton(text='▶ Продолжить', callback_data='resume'),
         InlineKeyboardButton(text='⏹ Стоп', callback_data='stop'),
     ]
 ])

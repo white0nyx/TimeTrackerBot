@@ -5,33 +5,76 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, CallbackQuery
 
-from tgbot.keyboards.inline import stop_timer_button, generate_category_keyboard, yes_no_keyboard
+from tgbot.keyboards.inline import pause_stop_keyboard, generate_category_keyboard, yes_no_keyboard, \
+    resume_stop_keyboard
 from tgbot.keyboards.reply import main_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
-from tgbot.misc.work_with_text import get_the_time_in_seconds
+from tgbot.misc.work_with_text import get_the_time_in_seconds, get_time_in_str_text
 
 
 async def start_button(message: Message, state: FSMContext):
     """Обработка кнопки СТАРТ"""
-    await message.answer('Время пошло!', reply_markup=stop_timer_button)
-
-    start_time = message.date
+    await message.answer('⏱ Время пошло!', reply_markup=pause_stop_keyboard)
 
     user_id = message.from_user.id
     fill_all_categories_past_date(user_id)
 
     async with state.proxy() as data:
-        data['last_start'] = start_time
+        data['last_start'] = message.date
+        data['all_time'] = 0
 
 
 def register_start_button(dp: Dispatcher):
+    """Регистрация обработчика кнопки СТАРТ"""
     dp.register_message_handler(start_button, Text('▶ Старт'), state=[None, States.my_categories, States.category_menu])
+
+
+async def pause_button(call: CallbackQuery, state: FSMContext):
+    """Обработка кнопки ПАУЗА"""
+    await call.answer(cache_time=10)
+    await call.message.delete()
+
+    async with state.proxy() as data:
+        seconds_now = get_the_time_in_seconds(str(datetime.now() - data['last_start']).split('.')[0])
+        data['all_time'] += seconds_now
+        data['pause'] = True
+
+        time_now_str = get_time_in_str_text(data['all_time'])
+
+    await call.message.answer(f'⏸ Пауза\nПрошло: {time_now_str}', reply_markup=resume_stop_keyboard)
+
+
+def register_pause_button(dp: Dispatcher):
+    """Регистрация обработчика кнопки ПАУЗА"""
+    dp.register_callback_query_handler(pause_button, text='pause', state=[None,
+                                                                          States.my_categories,
+                                                                          States.category_menu])
+
+
+async def resume_button(call: CallbackQuery, state: FSMContext):
+    """Обработка кнопки ПРОДОЛЖИТЬ"""
+    await call.answer(cache_time=10)
+    await call.message.delete()
+
+    async with state.proxy() as data:
+        data['last_start'] = datetime.now()
+        data['pause'] = False
+
+    await call.message.answer(f'⏱ Время пошло', reply_markup=pause_stop_keyboard)
+
+
+def register_resume_button(dp: Dispatcher):
+    """Регистрация обработчика кнопки продолжить"""
+    dp.register_callback_query_handler(resume_button, text='resume', state=[None,
+                                                                            States.my_categories,
+                                                                            States.category_menu])
 
 
 async def stop_button(call: CallbackQuery, state: FSMContext):
     """Обработка кнопки СТОП"""
     await call.answer(cache_time=60)
+    await call.message.delete()
 
     async with state.proxy() as data:
 
@@ -42,10 +85,13 @@ async def stop_button(call: CallbackQuery, state: FSMContext):
             now = data.get('end_time')
             send_time = False
 
-        all_time = str(now - data['last_start']).split('.')[0]
+        if not data['pause']:
+            seconds_now = get_the_time_in_seconds(str(now - data['last_start']).split('.')[0])
+            data['all_time'] += seconds_now
+
+        all_time = get_time_in_str_text(data['all_time'])
         data['last_time'] = all_time
         data['end_time'] = now
-        data['day_index'] = datetime.weekday(call.message.date)
 
         data['call_time'] = call
         data['state_time'] = state
@@ -170,6 +216,8 @@ def register_add_time_to_category(dp: Dispatcher):
 def register_all_timer(dp):
     """Регистрация всех обработчиков связанных с таймером"""
     register_start_button(dp)
+    register_pause_button(dp)
+    register_resume_button(dp)
     register_stop_button(dp)
     register_no_add_time_button(dp)
     register_register_no_add_button(dp)
