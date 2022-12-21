@@ -183,7 +183,6 @@ async def add_time_to_category(call: CallbackQuery, state: FSMContext):
             start = str(state_data.get('last_start')).split()[-1].split('.')[0]
             end = str(state_data.get('end_time')).split()[-1].split('.')[0]
             seconds = get_the_time_in_seconds(state_data.get('last_time'))
-            print(date_now, start, end, seconds, sep='\n', end='\n\n')
 
             empty_day = {'date': date_now,
                          'start': None,
