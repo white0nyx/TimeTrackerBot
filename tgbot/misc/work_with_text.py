@@ -95,15 +95,19 @@ def get_statistic(user_id, categories):
     count_categories = user_statistic.get('count_categories')
     member_since = user_statistic.get('member_since').split()[0]
 
-    text += f'Потрачено времени: {total_time}\n' \
-            f'До запуска бота: {time_before_bot}\n' \
-            f'После запуска бота: {time_after_bot}\n\n' \
-            f'Количество сессий: {total_sessions}\n' \
-            f'Текущая серия: {current_series}\n' \
-            f'Максимальная серия: {max_series}\n\n' \
-            f'Время в день: {time_per_day}\n' \
-            f'Время на категорию: {average_time_in_category}\n\n' \
-            f'Количество категорий: {count_categories}\n\n'
+    text += f'⏱ Время\n' \
+            f'┌Потрачено времени: {total_time}\n' \
+            f'├До запуска бота: {time_before_bot}\n' \
+            f'└После запуска бота: {time_after_bot}\n\n' \
+            f'🔥 Сессии и серии\n' \
+            f'┌Количество сессий: {total_sessions}\n' \
+            f'├Текущая серия: {current_series}\n' \
+            f'└Максимальная серия: {max_series}\n\n' \
+            f'📊 Аналитика\n' \
+            f'┌Время в день: {time_per_day}\n' \
+            f'├Время на категорию: {average_time_in_category}\n' \
+            f'└Количество категорий: {count_categories}\n\n' \
+            f'📓 Категории\n'
 
     for category in categories:
         text += f'{category["name"]} - {get_time_in_str_text(category["seconds"])}\n'
