@@ -88,6 +88,8 @@ def get_statistic(user_id, categories):
     time_before_bot = get_time_in_str_text(user_statistic.get('time_before_bot'))
     time_after_bot = get_time_in_str_text(user_statistic.get('time_after_bot'))
     total_sessions = user_statistic.get('total_sessions')
+    current_series = user_statistic.get('current_series')
+    max_series = user_statistic.get('max_series')
     time_per_day = get_time_in_str_text(user_statistic.get('time_per_day'))
     average_time_in_category = get_time_in_str_text(user_statistic.get('average_time_in_category'))
     count_categories = user_statistic.get('count_categories')
@@ -96,7 +98,9 @@ def get_statistic(user_id, categories):
     text += f'Потрачено времени: {total_time}\n' \
             f'До запуска бота: {time_before_bot}\n' \
             f'После запуска бота: {time_after_bot}\n\n' \
-            f'Количество сессий: {total_sessions}\n\n' \
+            f'Количество сессий: {total_sessions}\n' \
+            f'Текущая серия: {current_series}\n' \
+            f'Максимальная серия: {max_series}\n\n' \
             f'Время в день: {time_per_day}\n' \
             f'Время на категорию: {average_time_in_category}\n\n' \
             f'Количество категорий: {count_categories}\n\n'

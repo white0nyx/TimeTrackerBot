@@ -191,3 +191,18 @@ def delete_operation_from_db(user_id, category_name, operation):
         category['seconds'] -= operation.get('seconds')
         update_user_data(user_id, user)
         return
+
+
+def get_all_operations_from_all_categories(user_id):
+    """Получение всех операций из всех категорий"""
+    all_operations = []
+    user = get_user_from_json_db(user_id)
+    categories = user.get('categories')
+
+    for category in categories:
+        operations = category.get('operations')
+        for operation in operations:
+            all_operations.append(operation)
+
+    all_operations = list(sorted(all_operations, key=lambda x: x['date']))
+    print(all_operations)

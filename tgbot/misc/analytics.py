@@ -34,6 +34,9 @@ def get_total_analytics(user_id):
             if operation['date'] not in total_all_days:
                 total_all_days.append(operation['date'])
 
+    current_series = get_current_series(user_id)
+    max_series = get_max_series(user_id)
+
     count_categories = len(categories)
 
     time_per_day = int(total_hours_without_based_seconds / len(total_all_days))
@@ -46,6 +49,8 @@ def get_total_analytics(user_id):
             'time_before_bot': time_before_bot,
             'time_after_bot': time_after_bot,
             'total_sessions': total_operations,
+            'current_series': current_series,
+            'max_series': max_series,
             'time_per_day': time_per_day,
             'average_time_in_category': average_time_in_category,
             'count_categories': count_categories,
@@ -320,3 +325,72 @@ def get_range_hours(start, stop):
             result.append(i)
 
     return result
+
+
+def get_all_time_by_days(user_id):
+    """Получение словаря, где ключ - день, значение - общее количество потраченного времени в секундах"""
+    all_operations = []
+    user = get_user_from_json_db(user_id)
+    categories = user.get('categories')
+
+    for category in categories:
+        operations = category.get('operations')
+        for operation in operations:
+            all_operations.append(operation)
+
+    all_operations = list(sorted(all_operations, key=lambda x: x['date']))
+
+    day_full_time_list = {}
+    for operation in all_operations:
+
+        date = operation.get('date')
+        seconds = operation.get('seconds')
+
+        if seconds is None:
+            seconds = 0
+
+        if date not in day_full_time_list.keys():
+            day_full_time_list[date] = seconds
+
+        else:
+            day_full_time_list[date] += seconds
+
+    return day_full_time_list
+
+
+def get_max_series(user_id):
+    """Получить максимальную серию"""
+    low_minutes = 900
+    time_by_days = get_all_time_by_days(user_id)
+
+    series = 0
+    max_series = 0
+    for key, value in time_by_days.items():
+
+        if value >= low_minutes:
+            series += 1
+            max_series = max(max_series, series)
+
+        else:
+            series = 0
+
+    return max_series
+
+
+def get_current_series(user_id):
+    """Получить текущую серию"""
+
+    low_minutes = 900
+    time_by_days = get_all_time_by_days(user_id)
+    reversed_days = list(time_by_days.values())[::-1]
+
+    current_series = 0
+    for day in reversed_days:
+
+        if day < low_minutes:
+            return current_series
+
+        else:
+            current_series += 1
+
+    return current_series
