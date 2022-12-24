@@ -22,6 +22,7 @@ async def start_button(message: Message, state: FSMContext):
 
     async with state.proxy() as data:
         data['last_start'] = message.date
+        data['first_start'] = message.date
         data['all_time'] = 0
         data['pause'] = False
 
@@ -180,7 +181,7 @@ async def add_time_to_category(call: CallbackQuery, state: FSMContext):
             category['seconds'] += time_in_seconds
 
             date_now = str(datetime.now()).split()[0]
-            start = str(state_data.get('last_start')).split()[-1].split('.')[0]
+            start = str(state_data.get('first_start')).split()[-1].split('.')[0]
             end = str(state_data.get('end_time')).split()[-1].split('.')[0]
             seconds = get_the_time_in_seconds(state_data.get('last_time'))
 
