@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters import Text
 from aiogram.types import CallbackQuery, Message
 
 from tgbot.keyboards.inline import category_menu_keyboard, yes_no_keyboard, delete_operation_inline_keyboard
@@ -34,7 +35,9 @@ async def category_inline_button(call: CallbackQuery):
 
 def register_category_inline_button(dp: Dispatcher):
     """Регистрация обработчика нажатия на Inline-кнопку категории"""
-    dp.register_callback_query_handler(category_inline_button, state=[None, States.my_categories])
+    dp.register_callback_query_handler(category_inline_button,
+                                       Text(startswith='category_'),
+                                       state=[None, States.my_categories])
 
 
 async def see_category_operations(call: CallbackQuery, state: FSMContext):
@@ -170,7 +173,12 @@ async def edit_category(call: CallbackQuery, state: FSMContext):
 
 def register_edit_category(dp: Dispatcher):
     """Обработка нажатия на кнопки редактирования категории и добавления времени"""
-    dp.register_callback_query_handler(edit_category, state=[None, States.category_menu])
+    dp.register_callback_query_handler(edit_category,
+                                       text=['category_operations',
+                                             'add_time',
+                                             'change_title',
+                                             'delete_category'],
+                                       state=[None, States.category_menu])
 
 
 async def receiving_time_to_adding_time(message: Message, state: FSMContext):

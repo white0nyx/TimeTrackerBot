@@ -1,8 +1,9 @@
 import os
 
 from aiogram import Dispatcher
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-from aiogram.types import Message, InputFile, MediaGroup
+from aiogram.types import Message, InputFile, MediaGroup, CallbackQuery
 
 from tgbot.keyboards.inline import generate_statistic_time_keyboard
 from tgbot.misc.analytics import get_plot_total_time, get_diagram_week_statistic, get_circle_diagram_sessions_durations, \
@@ -12,7 +13,7 @@ from tgbot.misc.work_with_json import get_user_from_json_db, fill_all_categories
 from tgbot.misc.work_with_text import get_statistic
 
 
-async def statistic_button(message: Message):
+async def statistic_button(message: Message, state: FSMContext):
     """Обработка нажатия на кнопку Статистика"""
     user_id = message.from_user.id
 
@@ -52,8 +53,9 @@ async def statistic_button(message: Message):
             path_or_bytesio=f'data/{user_id}_session_count_by_hour_in_day.png')
         album.attach_photo(sessions_hours)
 
-    await message.answer_media_group(album)
-    await message.answer(text, reply_markup=generate_statistic_time_keyboard(user_id))
+    async with state.proxy() as data:
+        data['message_img'] = await message.answer_media_group(album)
+        data['message_text'] = await message.answer(text, reply_markup=generate_statistic_time_keyboard(user_id))
 
     os.remove(f'data/{user_id}_total_time.png')
     os.remove(f'data/{user_id}_week_statistic.png')
@@ -69,6 +71,23 @@ def register_statistic_button(dp: Dispatcher):
                                 state=[None, States.my_categories, States.category_menu])
 
 
+async def changing_statistics_period(call: CallbackQuery, state: FSMContext):
+    """Обработка нажатия на кнопки смены периода статистики"""
+    await call.answer(cache_time=10)
+    async with state.proxy() as data:
+        for img in data['message_img']:
+            await img.delete()
+        await data['message_text'].delete()
+
+
+def register_changing_statistics_period(dp: Dispatcher):
+    """Регистрация обработчика нажатия на кнопки смены периода статистики"""
+    dp.register_callback_query_handler(callback=changing_statistics_period,
+                                       text=['day', 'week', 'month', 'year', 'all_time'],
+                                       state='*')
+
+
 def register_all_statistic(dp):
     """Регистрация всех обработчиков связанных со статистикой"""
     register_statistic_button(dp)
+    register_changing_statistics_period(dp)
