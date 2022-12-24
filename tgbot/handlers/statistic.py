@@ -4,6 +4,7 @@ from aiogram import Dispatcher
 from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, InputFile, MediaGroup
 
+from tgbot.keyboards.inline import generate_statistic_time_keyboard
 from tgbot.misc.analytics import get_plot_total_time, get_diagram_week_statistic, get_circle_diagram_sessions_durations, \
     is_possible_get_circle_diagram_sessions_durations, get_diagram_by_hours_in_day
 from tgbot.misc.states import States
@@ -30,7 +31,7 @@ async def statistic_button(message: Message):
     # График изменения количества общих часов
     get_plot_total_time(str(user_id))
     all_time_plot = InputFile(path_or_bytesio=f'data/{user_id}_total_time.png')
-    album.attach_photo(all_time_plot, caption=text)
+    album.attach_photo(all_time_plot)
 
     # Диаграмма со статистикой по дням
     get_diagram_week_statistic(str(user_id))
@@ -47,11 +48,13 @@ async def statistic_button(message: Message):
     # Диаграмма со статистикой по часам
     if is_possible_get_circle_diagram_sessions_durations(user_id):
         get_diagram_by_hours_in_day(str(user_id))
-        sessions_hourse = InputFile(
+        sessions_hours = InputFile(
             path_or_bytesio=f'data/{user_id}_session_count_by_hour_in_day.png')
-        album.attach_photo(sessions_hourse)
+        album.attach_photo(sessions_hours)
 
     await message.answer_media_group(album)
+    await message.answer(text, reply_markup=generate_statistic_time_keyboard(user_id))
+
     os.remove(f'data/{user_id}_total_time.png')
     os.remove(f'data/{user_id}_week_statistic.png')
 
