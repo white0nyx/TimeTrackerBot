@@ -24,10 +24,11 @@ async def statistic_button(message: Message, state: FSMContext):
         await message.answer('Для получения статистики у вас должна быть установлена хотя бы одна категория')
         return
 
+    period_statistic = user.get('period_statistic')
     categories = user.get('categories')
 
     album = MediaGroup()
-    text = get_statistic(user_id, categories)
+    text = get_statistic(user_id, categories, period_statistic)
 
     # График изменения количества общих часов
     get_plot_total_time(str(user_id))

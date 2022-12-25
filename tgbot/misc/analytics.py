@@ -7,11 +7,26 @@ import json
 import numpy as np
 
 
-def get_total_analytics(user_id):
+def get_total_analytics(user_id, period_statistic):
     """Получение общей статистики"""
     user = get_user_from_json_db(user_id)
     categories = user.get('categories')
     member_since = user.get('user_data').get('member_since')
+
+    if period_statistic == 'day':
+        period_statistic_in_days = 1
+
+    if period_statistic == 'week':
+        period_statistic_in_days = 2
+
+    if period_statistic == 'month':
+        period_statistic_in_days = 3
+
+    if period_statistic == 'year':
+        period_statistic_in_days = 4
+
+    else:
+        period_statistic = 36500
 
     total_time = 0
     time_before_bot = 0

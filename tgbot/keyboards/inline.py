@@ -77,7 +77,7 @@ def generate_category_keyboard(categories=(), no_add_button=False):
 
 def generate_statistic_time_keyboard(user_id):
     user = get_user_from_json_db(user_id)
-    type_statistic = user.get('type_statistic')
+    type_statistic = user.get('period_statistic')
 
     if type_statistic == 'day':
         return InlineKeyboardMarkup(inline_keyboard=[[

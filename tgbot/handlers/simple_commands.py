@@ -35,7 +35,7 @@ async def start_command(message: Message):
                                             'member_since': today},
 
                               'categories': [],
-                              'type_statistic': 'all_time'}
+                              'period_statistic': 'all_time'}
 
         db.seek(0)
         json.dump(users, db, indent=4, ensure_ascii=False)

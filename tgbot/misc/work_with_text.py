@@ -79,11 +79,27 @@ def get_time_in_str_text(sec):
     return "%02d:%02d:%02d" % (hour, minutes, sec)
 
 
-def get_statistic(user_id, categories):
+def get_statistic(user_id, categories, period_statistic):
     """Получение текста для отображения статистики"""
-    text = '📈 <b>Ваша общая статистика</b>\n\n'
 
-    user_statistic = get_total_analytics(user_id)
+    if period_statistic == 'day':
+        word_period = 'день'
+
+    elif period_statistic == 'week':
+        word_period = 'неделю'
+
+    elif period_statistic == 'month':
+        word_period = 'месяц'
+
+    elif period_statistic == 'year':
+        word_period = 'год'
+
+    else:
+        word_period = 'всё время'
+
+    text = f'📈 <b>Ваша общая статистика за {word_period}</b>\n\n'
+
+    user_statistic = get_total_analytics(user_id, period_statistic)
     total_time = get_time_in_str_text(user_statistic.get('total_time'))
     time_before_bot = get_time_in_str_text(user_statistic.get('time_before_bot'))
     time_after_bot = get_time_in_str_text(user_statistic.get('time_after_bot'))
