@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from tgbot.misc.work_with_json import get_user_from_json_db
+from tgbot.misc.work_with_json import get_user_from_json_db, get_all_operations_from_all_categories, \
+    get_all_not_none_category_operations
 import matplotlib.pyplot as plt
 import json
 
@@ -13,63 +14,94 @@ def get_total_analytics(user_id, period_statistic):
     categories = user.get('categories')
     member_since = user.get('user_data').get('member_since')
 
-    if period_statistic == 'day':
-        period_statistic_in_days = 1
-
-    if period_statistic == 'week':
-        period_statistic_in_days = 2
-
-    if period_statistic == 'month':
-        period_statistic_in_days = 3
-
-    if period_statistic == 'year':
-        period_statistic_in_days = 4
-
-    else:
-        period_statistic = 36500
-
     total_time = 0
     time_before_bot = 0
     total_hours_without_based_seconds = 0
     total_operations = 0
     total_all_days = []
+    print(period_statistic)
 
+    if period_statistic == 'all_time':
+        for category in categories:
+            seconds = category['seconds']
+            total_time += seconds
+            time_before_bot += category['based_seconds']
+            total_seconds_without_based_seconds = seconds - category['based_seconds']
+            total_hours_without_based_seconds += total_seconds_without_based_seconds
+            operations = category['operations']
+
+            total_operations += len([x for x in operations if x.get('seconds') is not None and x.get('seconds') > 0])
+
+            for operation in operations:
+
+                if operation['date'] not in total_all_days:
+                    total_all_days.append(operation['date'])
+
+        current_series = get_current_series(user_id)
+        max_series = get_max_series(user_id)
+
+        count_categories = len(categories)
+
+        time_per_day = int(total_hours_without_based_seconds / len(total_all_days))
+
+        average_time_in_category = int(total_hours_without_based_seconds / count_categories)
+
+        time_after_bot = total_time - time_before_bot
+
+        return {'total_time': total_time,
+                'time_before_bot': time_before_bot,
+                'time_after_bot': time_after_bot,
+                'total_sessions': total_operations,
+                'current_series': current_series,
+                'max_series': max_series,
+                'time_per_day': time_per_day,
+                'average_time_in_category': average_time_in_category,
+                'count_categories': count_categories,
+                'member_since': member_since}
+
+    elif period_statistic == 'day':
+        period_statistic_in_days = 1
+
+    elif period_statistic == 'week':
+        period_statistic_in_days = 7
+
+    elif period_statistic == 'month':
+        period_statistic_in_days = 30
+
+    else:  # ГОД
+        period_statistic_in_days = 365
+
+    days_and_time = get_all_time_by_days(user_id)
+    seconds_by_day = list(days_and_time.values())[-period_statistic_in_days:]
+    total_time = sum(seconds_by_day)
+
+    all_time = 0
+    total_sessions = 0
     for category in categories:
-        seconds = category['seconds']
-        total_time += seconds
+        total_sessions += len(get_all_not_none_category_operations(user_id, category['name']))
+
+        all_time += category['seconds']
         time_before_bot += category['based_seconds']
-        total_seconds_without_based_seconds = seconds - category['based_seconds']
-        total_hours_without_based_seconds += total_seconds_without_based_seconds
-        operations = category['operations']
-
-        total_operations += len([x for x in operations if x.get('seconds') is not None and x.get('seconds') > 0])
-
-        for operation in operations:
-
-            if operation['date'] not in total_all_days:
-                total_all_days.append(operation['date'])
 
     current_series = get_current_series(user_id)
     max_series = get_max_series(user_id)
 
+    time_per_day = total_time // period_statistic_in_days
+
     count_categories = len(categories)
-
-    time_per_day = int(total_hours_without_based_seconds / len(total_all_days))
-
-    average_time_in_category = int(total_hours_without_based_seconds / count_categories)
-
-    time_after_bot = total_time - time_before_bot
-
+    average_time_in_category = int(total_time / count_categories)
+    time_after_bot = all_time - time_before_bot
     return {'total_time': total_time,
             'time_before_bot': time_before_bot,
             'time_after_bot': time_after_bot,
-            'total_sessions': total_operations,
+            'total_sessions': total_sessions,
             'current_series': current_series,
             'max_series': max_series,
             'time_per_day': time_per_day,
             'average_time_in_category': average_time_in_category,
             'count_categories': count_categories,
-            'member_since': member_since}
+            'member_since': member_since
+            }
 
 
 def get_dict_data_all_seconds(user_id):

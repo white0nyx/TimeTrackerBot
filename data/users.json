@@ -1,1 +1,250 @@
-{}
+{
+    "722858342": {
+        "user_data": {
+            "id": 722858342,
+            "username": "dmitrykotlyar",
+            "full_name": "Дмитрий Котляров",
+            "member_since": "2022-12-18 17:12:08"
+        },
+        "categories": [
+            {
+                "name": "💻 Программирование",
+                "based_seconds": 0,
+                "seconds": 16979,
+                "operations": [
+                    {
+                        "date": "2022-12-18",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-19",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-20",
+                        "start": "03:52:05",
+                        "end": "04:55:49",
+                        "seconds": 3824
+                    },
+                    {
+                        "date": "2022-12-21",
+                        "start": "19:33:27",
+                        "end": "20:42:08",
+                        "seconds": 4121
+                    },
+                    {
+                        "date": "2022-12-21",
+                        "start": "22:08:33",
+                        "end": "22:15:33",
+                        "seconds": 405
+                    },
+                    {
+                        "date": "2022-12-21",
+                        "start": "23:47:22",
+                        "end": "00:39:22",
+                        "seconds": 3120,
+                        "handmade": true
+                    },
+                    {
+                        "date": "2022-12-22",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-23",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-24",
+                        "start": "22:34:45",
+                        "end": "23:46:55",
+                        "seconds": 4330
+                    },
+                    {
+                        "date": "2022-12-25",
+                        "start": "00:13:43",
+                        "end": "00:29:57",
+                        "seconds": 1179
+                    }
+                ],
+                "callback_data": "category_0"
+            },
+            {
+                "name": "🇬🇧 Английский язык",
+                "based_seconds": 157800,
+                "seconds": 159315,
+                "operations": [
+                    {
+                        "date": "2022-12-18",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-19",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-20",
+                        "start": "01:20:48",
+                        "end": "01:46:03",
+                        "seconds": 1515
+                    },
+                    {
+                        "date": "2022-12-21",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-22",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-23",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-24",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-25",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    }
+                ],
+                "callback_data": "category_1"
+            },
+            {
+                "name": "⌨️ Слепая печать",
+                "based_seconds": 40200,
+                "seconds": 45338,
+                "operations": [
+                    {
+                        "date": "2022-12-18",
+                        "start": "20:31:09",
+                        "end": "21:33:25",
+                        "seconds": 3736
+                    },
+                    {
+                        "date": "2022-12-19",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-20",
+                        "start": "00:56:24",
+                        "end": "01:19:46",
+                        "seconds": 1402
+                    },
+                    {
+                        "date": "2022-12-21",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-22",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-23",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-24",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-25",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    }
+                ],
+                "callback_data": "category_2"
+            },
+            {
+                "name": "📚Чтение",
+                "based_seconds": 0,
+                "seconds": 0,
+                "operations": [
+                    {
+                        "date": "2022-12-18",
+                        "start": null,
+                        "end": null,
+                        "seconds": 264
+                    },
+                    {
+                        "date": "2022-12-19",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-20",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-21",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-22",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-23",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-24",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-25",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    }
+                ],
+                "callback_data": "category_3"
+            }
+        ],
+        "period_statistic": "all_time"
+    }
+}

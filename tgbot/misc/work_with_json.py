@@ -205,4 +205,4 @@ def get_all_operations_from_all_categories(user_id):
             all_operations.append(operation)
 
     all_operations = list(sorted(all_operations, key=lambda x: x['date']))
-    print(all_operations)
+    return all_operations
