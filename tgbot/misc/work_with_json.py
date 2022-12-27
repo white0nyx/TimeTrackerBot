@@ -206,3 +206,67 @@ def get_all_operations_from_all_categories(user_id):
 
     all_operations = list(sorted(all_operations, key=lambda x: x['date']))
     return all_operations
+
+
+def get_count_sessions_for_period(user_id, period=None):
+    """Получение количества сессий за период"""
+    user = get_user_from_json_db(user_id)
+
+    day_session_dict = {}
+    for category in user['categories']:
+        for operation in category['operations']:
+
+            is_not_none_operation = 1 if operation['seconds'] is not None else 0
+
+            if operation['date'] in day_session_dict.keys():
+                day_session_dict[operation['date']] += is_not_none_operation
+
+            else:
+                day_session_dict[operation['date']] = is_not_none_operation
+
+    day_session_dict = dict(sorted(day_session_dict.items()))
+
+    if period is None:
+        return sum(list(day_session_dict.values()))
+
+    else:
+        return sum(list(day_session_dict.values())[-period:])
+
+
+def get_time_per_day_for_category(user_id, category_name):
+    """Получение словаря, где ключ - дата (день),
+    значение - количество потраченных секунд за день в указанной категории"""
+    user = get_user_from_json_db(user_id)
+    day_time_dict = {}
+    for category in user['categories']:
+        if category['name'] == category_name:
+
+            for operation in category['operations']:
+
+                seconds = 0 if operation['seconds'] is None else operation['seconds']
+
+                if operation['date'] in day_time_dict.keys():
+                    day_time_dict[operation['date']] += seconds
+
+                else:
+                    day_time_dict[operation['date']] = seconds
+
+            break
+
+    return day_time_dict
+
+
+def get_time_per_categories_for_period(user_id, period):
+    """Получение словаря, где ключ - имя категории, значение - количество потраченного времени за период"""
+    user = get_user_from_json_db(user_id)
+
+    category_time_dict = {}
+
+    for category in user['categories']:
+
+        if category['name'] not in category_time_dict.keys():
+            second_in_period = sum(list(get_time_per_day_for_category(user_id, category['name']).values())[-period:])
+
+            category_time_dict[category['name']] = second_in_period
+
+    return category_time_dict

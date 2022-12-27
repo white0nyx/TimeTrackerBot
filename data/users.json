@@ -10,7 +10,7 @@
             {
                 "name": "💻 Программирование",
                 "based_seconds": 0,
-                "seconds": 16979,
+                "seconds": 31598,
                 "operations": [
                     {
                         "date": "2022-12-18",
@@ -72,6 +72,48 @@
                         "start": "00:13:43",
                         "end": "00:29:57",
                         "seconds": 1179
+                    },
+                    {
+                        "date": "2022-12-25",
+                        "start": "14:10:23",
+                        "end": "16:12:00",
+                        "seconds": 6325
+                    },
+                    {
+                        "date": "2022-12-26",
+                        "start": "16:14:10",
+                        "end": "17:18:14",
+                        "seconds": 3661
+                    },
+                    {
+                        "date": "2022-12-26",
+                        "start": "18:03:47",
+                        "end": "18:56:12",
+                        "seconds": 2486
+                    },
+                    {
+                        "date": "2022-12-26",
+                        "start": "19:02:47",
+                        "end": "19:38:30",
+                        "seconds": 2142
+                    },
+                    {
+                        "date": "2022-12-27",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-28",
+                        "start": "00:24:22",
+                        "end": "00:24:25",
+                        "seconds": 3
+                    },
+                    {
+                        "date": "2022-12-28",
+                        "start": "00:24:31",
+                        "end": "00:24:33",
+                        "seconds": 2
                     }
                 ],
                 "callback_data": "category_0"
@@ -79,7 +121,7 @@
             {
                 "name": "🇬🇧 Английский язык",
                 "based_seconds": 157800,
-                "seconds": 159315,
+                "seconds": 159317,
                 "operations": [
                     {
                         "date": "2022-12-18",
@@ -128,6 +170,24 @@
                         "start": null,
                         "end": null,
                         "seconds": null
+                    },
+                    {
+                        "date": "2022-12-26",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-27",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-28",
+                        "start": "00:24:38",
+                        "end": "00:24:40",
+                        "seconds": 2
                     }
                 ],
                 "callback_data": "category_1"
@@ -135,7 +195,7 @@
             {
                 "name": "⌨️ Слепая печать",
                 "based_seconds": 40200,
-                "seconds": 45338,
+                "seconds": 46238,
                 "operations": [
                     {
                         "date": "2022-12-18",
@@ -184,6 +244,25 @@
                         "start": null,
                         "end": null,
                         "seconds": null
+                    },
+                    {
+                        "date": "2022-12-26",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-27",
+                        "start": null,
+                        "end": null,
+                        "seconds": null
+                    },
+                    {
+                        "date": "2022-12-28",
+                        "start": "00:26:03",
+                        "end": "00:41:03",
+                        "seconds": 900,
+                        "handmade": true
                     }
                 ],
                 "callback_data": "category_2"
@@ -191,13 +270,13 @@
             {
                 "name": "📚Чтение",
                 "based_seconds": 0,
-                "seconds": 0,
+                "seconds": 9240,
                 "operations": [
                     {
                         "date": "2022-12-18",
                         "start": null,
                         "end": null,
-                        "seconds": 264
+                        "seconds": null
                     },
                     {
                         "date": "2022-12-19",
@@ -240,6 +319,30 @@
                         "start": null,
                         "end": null,
                         "seconds": null
+                    },
+                    {
+                        "date": "2022-12-26",
+                        "start": "14:16:51",
+                        "end": "15:36:36",
+                        "seconds": 4399
+                    },
+                    {
+                        "date": "2022-12-27",
+                        "start": "18:45:20",
+                        "end": "19:08:35",
+                        "seconds": 1386
+                    },
+                    {
+                        "date": "2022-12-27",
+                        "start": "21:01:40",
+                        "end": "22:04:14",
+                        "seconds": 3450
+                    },
+                    {
+                        "date": "2022-12-28",
+                        "start": "00:24:50",
+                        "end": "00:24:55",
+                        "seconds": 5
                     }
                 ],
                 "callback_data": "category_3"

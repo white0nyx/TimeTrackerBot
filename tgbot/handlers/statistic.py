@@ -5,11 +5,11 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, InputFile, MediaGroup, CallbackQuery
 
-from tgbot.keyboards.inline import generate_statistic_time_keyboard
+from tgbot.keyboards.inline import change_period_button, generate_statistic_period_keyboard
 from tgbot.misc.analytics import get_plot_total_time, get_diagram_week_statistic, get_circle_diagram_sessions_durations, \
     is_possible_get_circle_diagram_sessions_durations, get_diagram_by_hours_in_day
 from tgbot.misc.states import States
-from tgbot.misc.work_with_json import get_user_from_json_db, fill_all_categories_past_date
+from tgbot.misc.work_with_json import get_user_from_json_db, fill_all_categories_past_date, update_user_data
 from tgbot.misc.work_with_text import get_statistic
 
 
@@ -17,7 +17,7 @@ async def statistic_button(message: Message, state: FSMContext):
     """Обработка нажатия на кнопку Статистика"""
     user_id = message.from_user.id
 
-    fill_all_categories_past_date(user_id)
+    # fill_all_categories_past_date(user_id)
     user = get_user_from_json_db(user_id)
 
     if not user.get('categories'):
@@ -55,8 +55,9 @@ async def statistic_button(message: Message, state: FSMContext):
         album.attach_photo(sessions_hours)
 
     async with state.proxy() as data:
+        data['message'] = message
         data['message_img'] = await message.answer_media_group(album)
-        data['message_text'] = await message.answer(text, reply_markup=generate_statistic_time_keyboard(user_id))
+        data['message_text'] = await message.answer(text, reply_markup=generate_statistic_period_keyboard(user_id))
 
     os.remove(f'data/{user_id}_total_time.png')
     os.remove(f'data/{user_id}_week_statistic.png')
@@ -72,18 +73,41 @@ def register_statistic_button(dp: Dispatcher):
                                 state=[None, States.my_categories, States.category_menu])
 
 
-async def changing_statistics_period(call: CallbackQuery, state: FSMContext):
-    """Обработка нажатия на кнопки смены периода статистики"""
-    await call.answer(cache_time=10)
+async def changing_statistics_period_button(call: CallbackQuery, state: FSMContext):
+    """Обработка нажатия на кнопку ИЗМЕНИТЬ ПЕРИОД СТАТИСТИКИ"""
+    user_id = call.from_user.id
+    await call.answer(cache_time=1)
     async with state.proxy() as data:
         for img in data['message_img']:
             await img.delete()
         await data['message_text'].delete()
+    await call.message.answer('Выберите период, за который хотите увидеть статистику',
+                              reply_markup=generate_statistic_period_keyboard(user_id))
 
 
-def register_changing_statistics_period(dp: Dispatcher):
+def register_changing_statistics_period_button(dp: Dispatcher):
+    dp.register_callback_query_handler(changing_statistics_period_button, text='change_period', state='*')
+
+
+async def period_selection(call: CallbackQuery, state: FSMContext):
+    """Обработка нажатия на кнопки смены периода статистики"""
+    user_id = call.from_user.id
+
+    await call.answer(cache_time=10)
+
+    user = get_user_from_json_db(user_id)
+    user['period_statistic'] = call.data
+    update_user_data(user_id, user)
+
+    async with state.proxy() as data:
+        message = data['message']
+
+    await statistic_button(message, state)
+
+
+def register_period_selection(dp: Dispatcher):
     """Регистрация обработчика нажатия на кнопки смены периода статистики"""
-    dp.register_callback_query_handler(callback=changing_statistics_period,
+    dp.register_callback_query_handler(callback=period_selection,
                                        text=['day', 'week', 'month', 'year', 'all_time'],
                                        state='*')
 
@@ -91,4 +115,6 @@ def register_changing_statistics_period(dp: Dispatcher):
 def register_all_statistic(dp):
     """Регистрация всех обработчиков связанных со статистикой"""
     register_statistic_button(dp)
-    register_changing_statistics_period(dp)
+    register_changing_statistics_period_button(dp)
+    register_period_selection(dp)
+

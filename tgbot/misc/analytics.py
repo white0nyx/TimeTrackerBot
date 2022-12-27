@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from tgbot.misc.work_with_json import get_user_from_json_db, get_all_operations_from_all_categories, \
-    get_all_not_none_category_operations
+from tgbot.misc.work_with_json import get_user_from_json_db, get_all_not_none_category_operations, \
+    get_count_sessions_for_period, get_time_per_day_for_category, get_time_per_categories_for_period
 import matplotlib.pyplot as plt
 import json
 
@@ -17,7 +17,7 @@ def get_total_analytics(user_id, period_statistic):
     total_time = 0
     time_before_bot = 0
     total_hours_without_based_seconds = 0
-    total_operations = 0
+    total_sessions = 0
     total_all_days = []
     print(period_statistic)
 
@@ -30,7 +30,7 @@ def get_total_analytics(user_id, period_statistic):
             total_hours_without_based_seconds += total_seconds_without_based_seconds
             operations = category['operations']
 
-            total_operations += len([x for x in operations if x.get('seconds') is not None and x.get('seconds') > 0])
+            total_sessions += len([x for x in operations if x.get('seconds') is not None and x.get('seconds') > 0])
 
             for operation in operations:
 
@@ -45,63 +45,60 @@ def get_total_analytics(user_id, period_statistic):
         time_per_day = int(total_hours_without_based_seconds / len(total_all_days))
 
         average_time_in_category = int(total_hours_without_based_seconds / count_categories)
+        average_time_per_session = int(total_time / total_sessions)
 
         time_after_bot = total_time - time_before_bot
 
         return {'total_time': total_time,
                 'time_before_bot': time_before_bot,
                 'time_after_bot': time_after_bot,
-                'total_sessions': total_operations,
+                'total_sessions': total_sessions,
                 'current_series': current_series,
                 'max_series': max_series,
                 'time_per_day': time_per_day,
                 'average_time_in_category': average_time_in_category,
+                'average_time_per_session': average_time_per_session,
                 'count_categories': count_categories,
                 'member_since': member_since}
 
-    elif period_statistic == 'day':
-        period_statistic_in_days = 1
+    else:
 
-    elif period_statistic == 'week':
-        period_statistic_in_days = 7
+        days_and_time = get_all_time_by_days(user_id)
+        seconds_by_day = list(days_and_time.values())[-period_statistic:]
+        total_time = sum(seconds_by_day)
 
-    elif period_statistic == 'month':
-        period_statistic_in_days = 30
+        all_time = 0
+        for category in categories:
 
-    else:  # ГОД
-        period_statistic_in_days = 365
+            all_time += category['seconds']
+            time_before_bot += category['based_seconds']
+        total_sessions = get_count_sessions_for_period(user_id, period_statistic)
+        current_series = get_current_series(user_id)
+        max_series = get_max_series(user_id)
 
-    days_and_time = get_all_time_by_days(user_id)
-    seconds_by_day = list(days_and_time.values())[-period_statistic_in_days:]
-    total_time = sum(seconds_by_day)
+        time_per_day = total_time // period_statistic
 
-    all_time = 0
-    total_sessions = 0
-    for category in categories:
-        total_sessions += len(get_all_not_none_category_operations(user_id, category['name']))
+        count_categories = len(categories)
+        average_time_in_category = int(total_time / count_categories)
+        if total_sessions == 0:
+            average_time_per_session = 0
 
-        all_time += category['seconds']
-        time_before_bot += category['based_seconds']
-
-    current_series = get_current_series(user_id)
-    max_series = get_max_series(user_id)
-
-    time_per_day = total_time // period_statistic_in_days
-
-    count_categories = len(categories)
-    average_time_in_category = int(total_time / count_categories)
-    time_after_bot = all_time - time_before_bot
-    return {'total_time': total_time,
-            'time_before_bot': time_before_bot,
-            'time_after_bot': time_after_bot,
-            'total_sessions': total_sessions,
-            'current_series': current_series,
-            'max_series': max_series,
-            'time_per_day': time_per_day,
-            'average_time_in_category': average_time_in_category,
-            'count_categories': count_categories,
-            'member_since': member_since
-            }
+        else:
+            average_time_per_session = int(total_time / total_sessions)
+        print()
+        time_after_bot = all_time - time_before_bot
+        return {'total_time': total_time,
+                'time_before_bot': time_before_bot,
+                'time_after_bot': time_after_bot,
+                'total_sessions': total_sessions,
+                'current_series': current_series,
+                'max_series': max_series,
+                'time_per_day': time_per_day,
+                'average_time_in_category': average_time_in_category,
+                'average_time_per_session': average_time_per_session,
+                'count_categories': count_categories,
+                'member_since': member_since
+                }
 
 
 def get_dict_data_all_seconds(user_id):

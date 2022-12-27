@@ -75,7 +75,7 @@ def generate_category_keyboard(categories=(), no_add_button=False):
     return keyboard
 
 
-def generate_statistic_time_keyboard(user_id):
+def generate_statistic_period_keyboard(user_id):
     user = get_user_from_json_db(user_id)
     type_statistic = user.get('period_statistic')
 
@@ -118,3 +118,8 @@ def generate_statistic_time_keyboard(user_id):
             InlineKeyboardButton(text='Месяц', callback_data='month'),
             InlineKeyboardButton(text='Год', callback_data='year'),
         ]])
+
+
+change_period_button = InlineKeyboardMarkup(inline_keyboard=[[
+    InlineKeyboardButton(text='Изменить период статистики', callback_data='change_period')
+]])

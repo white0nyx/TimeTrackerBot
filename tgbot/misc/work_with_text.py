@@ -1,4 +1,5 @@
 from tgbot.misc.analytics import get_total_analytics
+from tgbot.misc.work_with_json import get_time_per_categories_for_period
 
 
 def is_valid_time(str_time: str, for_edit_time=False):
@@ -84,22 +85,28 @@ def get_statistic(user_id, categories, period_statistic):
 
     if period_statistic == 'day':
         word_period = 'день'
+        period_statistic_in_days = 1
 
     elif period_statistic == 'week':
         word_period = 'неделю'
+        period_statistic_in_days = 7
 
     elif period_statistic == 'month':
         word_period = 'месяц'
+        period_statistic_in_days = 30
 
     elif period_statistic == 'year':
         word_period = 'год'
+        period_statistic_in_days = 365
 
     else:
         word_period = 'всё время'
+        period_statistic_in_days = 'all_time'
 
     text = f'📈 <b>Ваша общая статистика за {word_period}</b>\n\n'
 
-    user_statistic = get_total_analytics(user_id, period_statistic)
+    user_statistic = get_total_analytics(user_id, period_statistic_in_days)
+    print(user_statistic)
     total_time = get_time_in_str_text(user_statistic.get('total_time'))
     time_before_bot = get_time_in_str_text(user_statistic.get('time_before_bot'))
     time_after_bot = get_time_in_str_text(user_statistic.get('time_after_bot'))
@@ -108,25 +115,59 @@ def get_statistic(user_id, categories, period_statistic):
     max_series = user_statistic.get('max_series')
     time_per_day = get_time_in_str_text(user_statistic.get('time_per_day'))
     average_time_in_category = get_time_in_str_text(user_statistic.get('average_time_in_category'))
+    average_time_per_session = get_time_in_str_text(user_statistic.get('average_time_per_session'))
     count_categories = user_statistic.get('count_categories')
     member_since = user_statistic.get('member_since').split()[0]
 
-    text += f'⏱ <u><b>Время</b></u>\n' \
-            f'┌Потрачено времени: {total_time}\n' \
-            f'├До запуска бота: {time_before_bot}\n' \
-            f'└После запуска бота: {time_after_bot}\n\n' \
-            f'🔥 <u><b>Сессии и серии</b></u>\n' \
-            f'┌Количество сессий: {total_sessions}\n' \
-            f'├Текущая серия: {current_series}\n' \
-            f'└Максимальная серия: {max_series}\n\n' \
-            f'📊 <u><b>Аналитика</b></u>\n' \
-            f'┌Время в день: {time_per_day}\n' \
-            f'├Время на категорию: {average_time_in_category}\n' \
-            f'└Количество категорий: {count_categories}\n\n' \
-            f'📓 <u><b>Категории</b></u>\n'
+    if period_statistic == 'all_time':
+        text += f'⏱ <u><b>Время</b></u>\n' \
+                f'┌Потрачено времени: {total_time}\n' \
+                f'├До запуска бота: {time_before_bot}\n' \
+                f'└После запуска бота: {time_after_bot}\n\n' \
+                f'🔥 <u><b>Сессии и серии</b></u>\n' \
+                f'┌Количество сессий: {total_sessions}\n' \
+                f'├Средняя длина сессии {average_time_per_session}' \
+                f'├Текущая серия: {current_series}\n' \
+                f'└Максимальная серия: {max_series}\n\n' \
+                f'📊 <u><b>Аналитика</b></u>\n' \
+                f'┌Время в день: {time_per_day}\n' \
+                f'├Время на категорию: {average_time_in_category}\n' \
+                f'└Количество категорий: {count_categories}\n\n' \
+                f'📓 <u><b>Категории</b></u>\n'
 
-    for category in categories:
-        text += f'{category["name"]} - {get_time_in_str_text(category["seconds"])}\n'
+    elif period_statistic == 'day':
+        text += f'⏱ <u><b>Время</b></u>\n' \
+                f'Потрачено времени: {total_time}\n\n' \
+                f'🔥 <u><b>Сессии и серии</b></u>\n' \
+                f'┌Количество сессий: {total_sessions}\n' \
+                f'└Текущая серия: {current_series}\n\n' \
+                f'📊 <u><b>Аналитика</b></u>\n' \
+                f'┌Средняя длина сессии: {average_time_per_session}\n' \
+                f'└Количество категорий: {count_categories}\n\n' \
+                f'📓 <u><b>Категории</b></u>\n'
+
+    elif period_statistic in ('week', 'month', 'year'):
+        text += f'⏱ <u><b>Время</b></u>\n' \
+                f'Потрачено времени: {total_time}\n\n' \
+                f'🔥 <u><b>Сессии и серии</b></u>\n' \
+                f'┌Количество сессий: {total_sessions}\n' \
+                f'├Текущая серия: {current_series}\n' \
+                f'└Максимальная серия: {max_series}\n\n' \
+                f'📊 <u><b>Аналитика</b></u>\n' \
+                f'┌Время в день: {time_per_day}\n' \
+                f'├Средняя длина сессии {average_time_per_session}\n' \
+                f'├Время на категорию: {average_time_in_category}\n' \
+                f'└Количество категорий: {count_categories}\n\n' \
+                f'📓 <u><b>Категории</b></u>\n'
+
+    if period_statistic != 'all_time':
+        category_time_in_period_dict = get_time_per_categories_for_period(user_id, period_statistic_in_days)
+        for category_name, time_in_period in category_time_in_period_dict.items():
+            text += f'{category_name} - {get_time_in_str_text(time_in_period)}\n'
+
+    else:
+        for category in categories:
+            text += f'{category["name"]} - {get_time_in_str_text(category["seconds"])}\n'
 
     text += f'\n👤 Подписчик с {member_since}\n\n'
 
