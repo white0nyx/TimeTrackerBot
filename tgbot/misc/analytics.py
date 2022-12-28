@@ -19,7 +19,6 @@ def get_total_analytics(user_id, period_statistic):
     total_hours_without_based_seconds = 0
     total_sessions = 0
     total_all_days = []
-    print(period_statistic)
 
     if period_statistic == 'all_time':
         for category in categories:
@@ -85,7 +84,7 @@ def get_total_analytics(user_id, period_statistic):
 
         else:
             average_time_per_session = int(total_time / total_sessions)
-        print()
+
         time_after_bot = all_time - time_before_bot
         return {'total_time': total_time,
                 'time_before_bot': time_before_bot,
