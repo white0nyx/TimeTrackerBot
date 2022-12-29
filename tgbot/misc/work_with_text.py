@@ -106,6 +106,11 @@ def get_statistic(user_id, categories, period_statistic):
     text = f'📈 <b>Ваша общая статистика за {word_period}</b>\n\n'
 
     user_statistic = get_total_analytics(user_id, period_statistic_in_days)
+
+    if user_statistic == 'No sessions':
+        return '⚠ Вы ещё не засекали и не записывали время с помощью бота.' \
+               'Для получения статистики необходимо произвести хотя бы одну сессию'
+
     total_time = get_time_in_str_text(user_statistic.get('total_time'))
     time_before_bot = get_time_in_str_text(user_statistic.get('time_before_bot'))
     time_after_bot = get_time_in_str_text(user_statistic.get('time_after_bot'))

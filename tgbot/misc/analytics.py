@@ -36,6 +36,9 @@ def get_total_analytics(user_id, period_statistic):
                 if operation['date'] not in total_all_days:
                     total_all_days.append(operation['date'])
 
+        if total_sessions == 0:
+            return 'No sessions'
+
         current_series = get_current_series(user_id)
         max_series = get_max_series(user_id)
 

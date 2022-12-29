@@ -41,11 +41,14 @@ async def statistic_button(message: Message, state: FSMContext):
     else:
         period_statistic_in_days = None
 
-
     categories = user.get('categories')
 
     album = MediaGroup()
     text = get_statistic(user_id, categories, period_statistic)
+
+    if text[0] == '⚠':
+        await message.answer(text)
+        return
 
     # График изменения количества общих часов
     get_plot_total_time(str(user_id), period_statistic_in_days)
@@ -134,4 +137,3 @@ def register_all_statistic(dp):
     register_statistic_button(dp)
     register_changing_statistics_period_button(dp)
     register_period_selection(dp)
-
