@@ -130,7 +130,7 @@ def get_statistic(user_id, categories, period_statistic):
                 f'└После запуска бота: {time_after_bot}\n\n' \
                 f'🔥 <u><b>Сессии и серии</b></u>\n' \
                 f'┌Количество сессий: {total_sessions}\n' \
-                f'├Средняя длина сессии {average_time_per_session}' \
+                f'├Средняя длина сессии {average_time_per_session}\n' \
                 f'├Текущая серия: {current_series}\n' \
                 f'└Максимальная серия: {max_series}\n\n' \
                 f'📊 <u><b>Аналитика</b></u>\n' \
