@@ -68,10 +68,10 @@ def get_total_analytics(user_id, period_statistic):
 
         all_time = 0
         for category in categories:
-
             all_time += category['seconds']
             time_before_bot += category['based_seconds']
-        total_sessions = get_count_sessions_for_period(user_id, period_statistic)
+        total_sessions = sum(get_count_sessions_for_period(user_id, period_statistic))
+
         current_series = get_current_series(user_id)
         max_series = get_max_series(user_id)
 
@@ -100,7 +100,7 @@ def get_total_analytics(user_id, period_statistic):
                 }
 
 
-def get_dict_data_all_seconds(user_id):
+def get_dict_date_all_seconds(user_id, period=None):
     """Получение словаря, где ключ - день, значение - потраченное время в секундах в этот день"""
     with open('data/users.json', 'r', encoding='utf-8') as file:
         user = json.load(file).get(str(user_id))
@@ -123,16 +123,55 @@ def get_dict_data_all_seconds(user_id):
                 all_days_and_operations[date] = 0
 
             all_days_and_operations[date] += seconds / 3600
-
     all_days_and_operations = dict(sorted(all_days_and_operations.items()))
+
+    if period is not None:
+        keys = list(all_days_and_operations.keys())[-period:]
+        values = list(all_days_and_operations.values())[-period:]
+        all_days_and_operations = {}
+
+        for i in range(len(keys)):
+            all_days_and_operations[keys[i]] = values[i]
+
     return all_days_and_operations
 
 
-def get_plot_total_time(user_id):
+def get_dict_date_all_sessions(user_id, period=None):
+    user = get_user_from_json_db(user_id)
+    categories = user['categories']
+    date_all_sessions = {}
+
+    for category in categories:
+        for operation in category['operations']:
+            date = operation['date']
+            count_session = 0 if operation['seconds'] is None else 1
+
+            if date not in date_all_sessions.keys():
+                date_all_sessions[date] = count_session
+
+            else:
+                date_all_sessions[date] += count_session
+
+    if period is not None:
+        keys = list(date_all_sessions.keys())[-period:]
+        values = list(date_all_sessions.values())[-period:]
+        date_all_sessions = {}
+        for i in range(len(keys)):
+            date_all_sessions[keys[i]] = values[i]
+
+    return date_all_sessions
+
+
+def get_plot_total_time(user_id, period=None):
     """Построение графика изменения общего времени"""
-    data_dict = get_dict_data_all_seconds(user_id)
-    days = list(data_dict.keys())
-    seconds = data_dict.values()
+    data_dict = get_dict_date_all_seconds(user_id)
+
+    if period is None:
+        days = list(data_dict.keys())
+        seconds = data_dict.values()
+    else:
+        days = list(data_dict.keys())[-period:]
+        seconds = list(data_dict.values())[-period:]
 
     plt.figure(figsize=(9, 6))
 
@@ -159,10 +198,9 @@ def get_plot_total_time(user_id):
     plt.close()
 
 
-def get_statistic_by_day_of_week(user_id):
+def get_statistic_by_day_of_week(user_id, period=None):
     """Получение словаря, который хранит часы и сессии для каждого дня недели"""
     user = get_user_from_json_db(user_id)
-    categories = user.get('categories')
 
     days = {0: 'monday',
             1: 'tuesday',
@@ -180,35 +218,27 @@ def get_statistic_by_day_of_week(user_id):
                          'saturday': {'hours': 0, 'sessions': 0},
                          'sunday': {'hours': 0, 'sessions': 0}}
 
-    dict_data_all_seconds = get_dict_data_all_seconds(user_id)
-
+    # Сбор информации о часах
+    dict_data_all_seconds = get_dict_date_all_seconds(user_id, period)
     for date, hours in dict_data_all_seconds.items():
         year, month, day = map(int, date.split('-'))
-
         day_of_week = days[datetime(year, month, day).weekday()]
-
         days_and_sessions[day_of_week]['hours'] += hours
 
-    for category in categories:
-        for operation in category.get('operations'):
-            date = operation.get('date')
-            seconds = operation.get('seconds')
+    # Сбор информации о сессиях
+    date_all_sessions = get_dict_date_all_sessions(user_id, period)
+    for date, sessions in date_all_sessions.items():
 
-            if seconds is None:
-                continue
-
-            year, month, day = map(int, date.split('-'))
-
-            day_of_week = days[datetime(year, month, day).weekday()]
-            if seconds > 0:
-                days_and_sessions[day_of_week]['sessions'] += 1
+        year, month, day = map(int, date.split('-'))
+        day_of_week = days[datetime(year, month, day).weekday()]
+        days_and_sessions[day_of_week]['sessions'] += sessions
 
     return days_and_sessions
 
 
-def get_diagram_week_statistic(user_id):
+def get_diagram_week_statistic(user_id, period=None):
     """Получение диаграммы, которая отображает количество часов и сессий на каждый день недели"""
-    days_and_sessions = get_statistic_by_day_of_week(user_id)
+    days_and_sessions = get_statistic_by_day_of_week(user_id, period)
 
     days_of_week = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
 

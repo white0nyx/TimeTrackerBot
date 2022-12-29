@@ -227,10 +227,10 @@ def get_count_sessions_for_period(user_id, period=None):
     day_session_dict = dict(sorted(day_session_dict.items()))
 
     if period is None:
-        return sum(list(day_session_dict.values()))
+        return list(day_session_dict.values())
 
     else:
-        return sum(list(day_session_dict.values())[-period:])
+        return list(day_session_dict.values())[-period:]
 
 
 def get_time_per_day_for_category(user_id, category_name):
