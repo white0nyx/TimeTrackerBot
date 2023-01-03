@@ -327,8 +327,8 @@ def get_circle_diagram_sessions_durations(user_id):
     plt.close(fig)
 
 
-def is_possible_get_circle_diagram_sessions_durations(user_id):
-    """Проверка возможности создать круговую диаграмму"""
+def is_possible_get_graphics(user_id):
+    """Проверка возможности построить графики"""
     sessions_durations_data = get_duration_sessions_data(user_id)
     values = tuple(sessions_durations_data.values())
     return not values[0] == values[1] == values[2] == values[3] == values[4] == 0
