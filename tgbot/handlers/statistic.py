@@ -66,7 +66,7 @@ async def statistic_button(message: Message, state: FSMContext):
     album.attach_photo(circle_diagram_sessions_durations)
 
     # Диаграмма со статистикой по часам
-    get_diagram_by_hours_in_day(str(user_id))
+    get_diagram_by_hours_in_day(str(user_id), period_statistic_in_days)
     sessions_hours = InputFile(f'data/{user_id}_session_count_by_hour_in_day.png')
     album.attach_photo(sessions_hours)
 

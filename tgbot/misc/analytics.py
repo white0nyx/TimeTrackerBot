@@ -372,7 +372,7 @@ def is_possible_get_graphics(user_id):
     return not values[0] == values[1] == values[2] == values[3] == values[4] == 0
 
 
-def get_statistic_by_hours_in_day(user_id):
+def get_statistic_by_hours_in_day(user_id, period=None):
     """Получение статистики по часам"""
     user = get_user_from_json_db(user_id)
 
@@ -382,9 +382,18 @@ def get_statistic_by_hours_in_day(user_id):
 
     categories = user.get('categories')
 
+    dates = []
     for category in categories:
 
-        for operation in category['operations']:
+        for operation in category['operations'][::-1]:
+
+            date = operation['date']
+
+            if len(dates) == period and date not in dates:
+                continue
+
+            if date not in dates:
+                dates.append(date)
 
             if operation.get('start') is None:
                 continue
@@ -398,9 +407,9 @@ def get_statistic_by_hours_in_day(user_id):
     return hours_in_day
 
 
-def get_diagram_by_hours_in_day(user_id):
+def get_diagram_by_hours_in_day(user_id, period=None):
     """Получение диаграммы, отображающей статистику по часам"""
-    hours_in_day = get_statistic_by_hours_in_day(user_id)
+    hours_in_day = get_statistic_by_hours_in_day(user_id, period)
     hours = list(hours_in_day.keys())
     counts = list(hours_in_day.values())
 
