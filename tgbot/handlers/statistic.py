@@ -6,8 +6,8 @@ from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, InputFile, MediaGroup, CallbackQuery
 
 from tgbot.keyboards.inline import generate_statistic_period_keyboard
-from tgbot.misc.analytics import get_plot_total_time, get_diagram_week_statistic, get_circle_diagram_sessions_durations, \
-    is_possible_get_graphics, get_diagram_by_hours_in_day
+from tgbot.misc.analytics import get_plot_total_time, get_diagram_week_statistic, get_circle_diagram_sessions_durations,\
+    get_diagram_by_hours_in_day
 from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
 from tgbot.misc.work_with_text import get_statistic
@@ -61,7 +61,7 @@ async def statistic_button(message: Message, state: FSMContext):
     album.attach_photo(diagram_week_statistic)
 
     # Круговая диаграмма по продолжительности сессий
-    get_circle_diagram_sessions_durations(str(user_id))
+    get_circle_diagram_sessions_durations(str(user_id), period_statistic_in_days)
     circle_diagram_sessions_durations = InputFile(f'data/{user_id}_sessions_durations_statistic.png')
     album.attach_photo(circle_diagram_sessions_durations)
 

@@ -203,7 +203,6 @@ def get_plot_total_time(user_id, period=None):
 
 def get_statistic_by_day_of_week(user_id, period=None):
     """Получение словаря, который хранит часы и сессии для каждого дня недели"""
-    user = get_user_from_json_db(user_id)
 
     days = {0: 'monday',
             1: 'tuesday',
@@ -231,7 +230,6 @@ def get_statistic_by_day_of_week(user_id, period=None):
     # Сбор информации о сессиях
     date_all_sessions = get_dict_date_all_sessions(user_id, period)
     for date, sessions in date_all_sessions.items():
-
         year, month, day = map(int, date.split('-'))
         day_of_week = days[datetime(year, month, day).weekday()]
         days_and_sessions[day_of_week]['sessions'] += sessions
@@ -270,43 +268,82 @@ def get_diagram_week_statistic(user_id, period=None):
     plt.close(fig)
 
 
-def get_duration_sessions_data(user_id):
+def get_duration_sessions_data(user_id, period=None):
     """Получение словаря, где ключ - длина сессий, значение - количество сессий такой длины"""
-    sessions_durations = {'< 30 минут': 0, '30-60 минут': 0, '1-2 часа': 0, '2-4 часа': 0, '4+ часа': 0}
+    sessions = {'< 30 минут': 0, '30-60 минут': 0, '1-2 часа': 0, '2-4 часа': 0, '4+ часа': 0}
+    dict_date_sessions_durations = get_dict_date_sessions_durations(user_id, period)
 
+    for date, sessions_durations in dict_date_sessions_durations.items():
+        for key, value in sessions_durations.items():
+            sessions[key] += value
+
+    return sessions
+
+
+def get_dict_date_sessions_durations(user_id, period=None):
+    """Получить словарь вида {date: {'< 30 минут': x, ... '4+ часа': y}}, за указанный период"""
     user = get_user_from_json_db(user_id)
-    categories = user.get('categories')
 
-    for category in categories:
+    dict_date_sessions_durations = {}
+    for category in user['categories']:
+        for operation in category['operations'][::-1]:
 
-        for operation in category.get('operations'):
+            date = operation['date']
+            seconds = operation['seconds']
 
-            seconds = operation.get('seconds')
+            if seconds is None:
+                seconds = 0
 
-            if seconds is None or seconds <= 0:
+            if period is not None and len(
+                    dict_date_sessions_durations) == period and date not in dict_date_sessions_durations.keys():
                 continue
 
-            if seconds < 1_800:
-                sessions_durations['< 30 минут'] += 1
+            if date in dict_date_sessions_durations.keys():
+                if 1 <= seconds < 1_800:
+                    dict_date_sessions_durations[date]['< 30 минут'] += 1
 
-            elif 1_800 <= seconds < 3_600:
-                sessions_durations['30-60 минут'] += 1
+                elif 1_800 <= seconds < 3_600:
+                    dict_date_sessions_durations[date]['30-60 минут'] += 1
 
-            elif 3_600 <= seconds < 7_200:
-                sessions_durations['1-2 часа'] += 1
+                elif 3_600 <= seconds < 7_200:
+                    dict_date_sessions_durations[date]['1-2 часа'] += 1
 
-            elif 7_200 <= seconds < 14_400:
-                sessions_durations['2-4 часа'] += 1
+                elif 7_200 <= seconds < 14_400:
+                    dict_date_sessions_durations[date]['2-4 часа'] += 1
 
-            elif 14_400 <= seconds:
-                sessions_durations['4+ часа'] += 1
+                elif 14_400 <= seconds:
+                    dict_date_sessions_durations[date]['4+ часа'] += 1
 
-    return sessions_durations
+            else:
+
+                dict_date_sessions_durations[date] = {'< 30 минут': 0,
+                                                      '30-60 минут': 0,
+                                                      '1-2 часа': 0,
+                                                      '2-4 часа': 0,
+                                                      '4+ часа': 0,
+                                                      }
+
+                if 1 <= seconds < 1_800:
+                    dict_date_sessions_durations[date]['< 30 минут'] = 1
+
+                elif 1_800 <= seconds < 3_600:
+                    dict_date_sessions_durations[date]['30-60 минут'] = 1
+
+                elif 3_600 <= seconds < 7_200:
+                    dict_date_sessions_durations[date]['1-2 часа'] = 1
+
+                elif 7_200 <= seconds < 14_400:
+                    dict_date_sessions_durations[date]['2-4 часа'] = 1
+
+                elif 14_400 <= seconds:
+                    dict_date_sessions_durations[date]['4+ часа'] = 1
+
+    return dict_date_sessions_durations
 
 
-def get_circle_diagram_sessions_durations(user_id):
+def get_circle_diagram_sessions_durations(user_id, period=None):
     """Получение круговой диаграммы, отображающей статистику по длинам сессий"""
-    sessions_durations_data = get_duration_sessions_data(user_id)
+    sessions_durations_data = get_duration_sessions_data(user_id, period)
     clear_sessions_durations_data = {}
 
     for key, value in sessions_durations_data.items():
