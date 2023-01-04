@@ -6,8 +6,13 @@ from tgbot.misc.work_with_json import get_user_from_json_db
 
 pause_stop_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
+        InlineKeyboardButton(text='🔄 Обновить', callback_data='update')
+    ],
+    [
         InlineKeyboardButton(text='⏸ Пауза', callback_data='pause'),
-        InlineKeyboardButton(text='⏹ Стоп', callback_data='stop'),
+    ],
+    [
+        InlineKeyboardButton(text='⏹ Стоп', callback_data='stop')
     ]
 ])
 
@@ -15,7 +20,7 @@ pause_stop_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 resume_stop_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text='▶ Продолжить', callback_data='resume'),
-        InlineKeyboardButton(text='⏹ Стоп', callback_data='stop'),
+        InlineKeyboardButton(text='⏹ Стоп', callback_data='stop')
     ]
 ])
 

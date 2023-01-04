@@ -15,7 +15,8 @@ from tgbot.misc.work_with_text import get_the_time_in_seconds, get_time_in_str_t
 
 async def start_button(message: Message, state: FSMContext):
     """Обработка кнопки СТАРТ"""
-    await message.answer('⏱ Время пошло!', reply_markup=pause_stop_keyboard)
+    await message.answer(f'⏱ Время пошло!\n\n'
+                         f'Прошло: 00:00:00', reply_markup=pause_stop_keyboard)
 
     user_id = message.from_user.id
     fill_all_categories_past_date(user_id)
@@ -29,7 +30,26 @@ async def start_button(message: Message, state: FSMContext):
 
 def register_start_button(dp: Dispatcher):
     """Регистрация обработчика кнопки СТАРТ"""
-    dp.register_message_handler(start_button, Text('▶ Старт'), state=[None, States.my_categories, States.category_menu])
+    dp.register_message_handler(start_button, Text('▶ Старт'), )
+
+
+async def update_button(call: CallbackQuery, state: FSMContext):
+    """Обработка кнопки ОБНОВИТЬ"""
+    await call.message.delete()
+
+    async with state.proxy() as data:
+        seconds_now = get_the_time_in_seconds(str(datetime.now() - data['last_start']).split('.')[0])
+        time_now_str = get_time_in_str_text(data['all_time'] + seconds_now)
+
+    await call.message.answer(f'⏱ Время пошло\n\n'
+                              f'Прошло: {time_now_str}', reply_markup=pause_stop_keyboard)
+
+
+def register_update_button(dp: Dispatcher):
+    """Регистрация обработчика кнопки ОБНОВИТЬ"""
+    dp.register_callback_query_handler(update_button,
+                                       text='update',
+                                       state=[None, States.my_categories, States.category_menu])
 
 
 async def pause_button(call: CallbackQuery, state: FSMContext):
@@ -44,7 +64,7 @@ async def pause_button(call: CallbackQuery, state: FSMContext):
 
         time_now_str = get_time_in_str_text(data['all_time'])
 
-    await call.message.answer(f'⏸ Пауза\nПрошло: {time_now_str}', reply_markup=resume_stop_keyboard)
+    await call.message.answer(f'⏸ Пауза\n\nПрошло: {time_now_str}', reply_markup=resume_stop_keyboard)
 
 
 def register_pause_button(dp: Dispatcher):
@@ -60,10 +80,14 @@ async def resume_button(call: CallbackQuery, state: FSMContext):
     await call.message.delete()
 
     async with state.proxy() as data:
-        data['last_start'] = datetime.now()
+        now = datetime.now()
+        data['last_start'] = now
         data['pause'] = False
 
-    await call.message.answer(f'⏱ Время пошло', reply_markup=pause_stop_keyboard)
+        time_now_str = get_time_in_str_text(data['all_time'])
+
+    await call.message.answer(f'⏱ Время пошло\n'
+                              f'Прошло: {time_now_str}', reply_markup=pause_stop_keyboard)
 
 
 def register_resume_button(dp: Dispatcher):
@@ -218,6 +242,7 @@ def register_add_time_to_category(dp: Dispatcher):
 def register_all_timer(dp):
     """Регистрация всех обработчиков связанных с таймером"""
     register_start_button(dp)
+    register_update_button(dp)
     register_pause_button(dp)
     register_resume_button(dp)
     register_stop_button(dp)
