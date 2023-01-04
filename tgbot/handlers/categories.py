@@ -8,7 +8,8 @@ from aiogram.types import Message, CallbackQuery
 from tgbot.keyboards.inline import yes_no_keyboard, generate_category_keyboard
 from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
-from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
+from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
+    get_all_category_names
 from tgbot.misc.work_with_text import get_the_time_in_seconds, is_valid_time, get_time_in_str_text
 
 
@@ -60,10 +61,16 @@ def register_add_new_category(dp: Dispatcher):
 async def save_name_new_category(message: Message, state: FSMContext):
     """Сохранение названия категории и запрос потраченного времени"""
     category_name = message.text
+    user_id = message.from_user.id
 
     if len(category_name) > 32:
         await message.answer('⚠ Слишком длинное название\n\n'
                              'Вы можете указать название длиной до 32 символов\n\n'
+                             'Пожалуйста, повторите ввод', reply_markup=cancel_button)
+        return
+
+    if category_name in get_all_category_names(user_id):
+        await message.answer('⚠ Категория с таким названием уже существует\n\n'
                              'Пожалуйста, повторите ввод', reply_markup=cancel_button)
         return
 

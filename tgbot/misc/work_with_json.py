@@ -270,3 +270,8 @@ def get_time_per_categories_for_period(user_id, period):
             category_time_dict[category['name']] = second_in_period
 
     return category_time_dict
+
+
+def get_all_category_names(user_id):
+    user = get_user_from_json_db(user_id)
+    return [category['name'] for category in user['categories']]

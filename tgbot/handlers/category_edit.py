@@ -10,7 +10,7 @@ from tgbot.keyboards.reply import cancel_button, main_keyboard
 from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date, \
     possible_add_time, get_operation_by_serial_number_from_the_end, \
-    get_all_not_none_category_operations, delete_operation_from_db
+    get_all_not_none_category_operations, delete_operation_from_db, get_all_category_names
 from tgbot.misc.work_with_text import get_category_info_message, get_time_in_str_text, is_valid_time, \
     get_the_time_in_seconds, get_text_category_operations
 
@@ -288,10 +288,16 @@ def register_confirm_adding_time(dp: Dispatcher):
 async def ask_category_title(message: Message, state: FSMContext):
     """Обработка получения нового названия для категории"""
     new_title = message.text
+    user_id = message.from_user.id
 
     if len(new_title) > 32:
         await message.answer('⚠ Слишком длинное название\n\n'
                              'Вы можете указать название длиной до 32 символов\n\n'
+                             'Пожалуйста, повторите ввод', reply_markup=cancel_button)
+        return
+
+    if new_title in get_all_category_names(user_id):
+        await message.answer('⚠ Категория с таким названием уже существует\n\n'
                              'Пожалуйста, повторите ввод', reply_markup=cancel_button)
         return
 
