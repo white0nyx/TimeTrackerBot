@@ -30,7 +30,7 @@ yes_no_keyboard = InlineKeyboardMarkup(inline_keyboard=[
 # Клавиатура меню категории
 category_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [
-        InlineKeyboardButton(text='👀 Посмотреть сессии', callback_data='category_operations')
+        InlineKeyboardButton(text='👀 Посмотреть сессии', callback_data='category_operations'),
     ],
     [
         InlineKeyboardButton(text='➕ Добавить время', callback_data='add_time')
@@ -76,48 +76,59 @@ def generate_category_keyboard(categories=(), no_add_button=False):
 
 
 def generate_statistic_period_keyboard(user_id):
+    """Создание клавиатуры для переключения периода статистики"""
     user = get_user_from_json_db(user_id)
     type_statistic = user.get('period_statistic')
 
     if type_statistic == 'day':
-        return InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text='Неделя', callback_data='week'),
-            InlineKeyboardButton(text='Месяц', callback_data='month'),
-            InlineKeyboardButton(text='Год', callback_data='year'),
-            InlineKeyboardButton(text='Всё время', callback_data='all_time'),
-        ]])
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text='Неделя', callback_data='week'),
+                InlineKeyboardButton(text='Месяц', callback_data='month')],
+            [
+                InlineKeyboardButton(text='Год', callback_data='year'),
+                InlineKeyboardButton(text='Всё время', callback_data='all_time'),
+            ]])
 
     elif type_statistic == 'week':
-        return InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text='День', callback_data='day'),
-            InlineKeyboardButton(text='Месяц', callback_data='month'),
-            InlineKeyboardButton(text='Год', callback_data='year'),
-            InlineKeyboardButton(text='Всё время', callback_data='all_time'),
-        ]])
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text='День', callback_data='day'),
+                InlineKeyboardButton(text='Месяц', callback_data='month')],
+            [
+                InlineKeyboardButton(text='Год', callback_data='year'),
+                InlineKeyboardButton(text='Всё время', callback_data='all_time'),
+            ]])
 
     elif type_statistic == 'month':
-        return InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text='День', callback_data='day'),
-            InlineKeyboardButton(text='Неделя', callback_data='week'),
-            InlineKeyboardButton(text='Год', callback_data='year'),
-            InlineKeyboardButton(text='Всё время', callback_data='all_time'),
-        ]])
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text='День', callback_data='day'),
+                InlineKeyboardButton(text='Неделя', callback_data='week')],
+            [
+                InlineKeyboardButton(text='Год', callback_data='year'),
+                InlineKeyboardButton(text='Всё время', callback_data='all_time'),
+            ]])
 
     elif type_statistic == 'year':
-        return InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text='День', callback_data='day'),
-            InlineKeyboardButton(text='Неделя', callback_data='week'),
-            InlineKeyboardButton(text='Месяц', callback_data='month'),
-            InlineKeyboardButton(text='Всё время', callback_data='all_time'),
-        ]])
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text='День', callback_data='day'),
+                InlineKeyboardButton(text='Неделя', callback_data='week')],
+            [
+                InlineKeyboardButton(text='Месяц', callback_data='month'),
+                InlineKeyboardButton(text='Всё время', callback_data='all_time'),
+            ]])
 
     elif type_statistic == 'all_time':
-        return InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text='День', callback_data='day'),
-            InlineKeyboardButton(text='Неделя', callback_data='week'),
-            InlineKeyboardButton(text='Месяц', callback_data='month'),
-            InlineKeyboardButton(text='Год', callback_data='year'),
-        ]])
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text='День', callback_data='day'),
+                InlineKeyboardButton(text='Неделя', callback_data='week')],
+            [
+                InlineKeyboardButton(text='Месяц', callback_data='month'),
+                InlineKeyboardButton(text='Год', callback_data='year'),
+            ]])
 
 
 change_period_button = InlineKeyboardMarkup(inline_keyboard=[[
