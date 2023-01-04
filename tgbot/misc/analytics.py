@@ -354,6 +354,7 @@ def get_circle_diagram_sessions_durations(user_id, period=None):
     values = list(clear_sessions_durations_data.values())
 
     fig, ax = plt.subplots(figsize=(9, 6))
+    ax.set_title('Продолжительность сессий')
     ax.pie(values, labels=labels, autopct='%1.1f%%', shadow=False,
            wedgeprops={'lw': 1, 'ls': '-', 'edgecolor': 'k'},
            rotatelabels=True)

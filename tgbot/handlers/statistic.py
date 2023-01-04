@@ -117,6 +117,10 @@ async def period_selection(call: CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         message = data['message']
 
+        for img in data['message_img']:
+            await img.delete()
+        await data['message_text'].delete()
+
     await statistic_button(message, state)
 
 
