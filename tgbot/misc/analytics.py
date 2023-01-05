@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from tgbot.misc.work_with_json import get_user_from_json_db, get_all_not_none_category_operations, \
-    get_count_sessions_for_period, get_time_per_day_for_category, get_time_per_categories_for_period
+from tgbot.misc.work_with_json import get_user_from_json_db, get_count_sessions_for_period
 import matplotlib.pyplot as plt
 import json
 
@@ -201,6 +200,79 @@ def get_plot_total_time(user_id, period=None):
     plt.close()
 
 
+def get_circle_diagram_time_to_category(user_id, period=None):
+    """Получение круговой диаграммы, отображающей статистику по длинам сессий"""
+    category_time_dict = get_category_time_dict(user_id, period)
+    labels = list(category_time_dict.keys())
+    values = list(category_time_dict.values())
+
+    fig, ax = plt.subplots(figsize=(9, 6))
+    ax.set_title('Распределение времени по категориям')
+    ax.pie(values, labels=labels, autopct=make_auto_pct(values), shadow=False,
+           wedgeprops={'lw': 1, 'ls': '-', 'edgecolor': 'k'}, labeldistance=1.05)
+    ax.axis('equal')
+
+    plt.savefig(f'data/{user_id}_diagram_time_to_category.png')
+    plt.clf()
+    plt.close(fig)
+
+
+def make_auto_pct(values):
+    """Генерация подписей долей диаграммы"""
+    def my_auto_pct(pct):
+        total = sum(values)
+        val = int(round(pct * total / 100.0)) // 3600
+        return '{p:.0f}%  ({v:d})'.format(p=pct, v=val)
+
+    return my_auto_pct
+
+
+def get_category_time_dict(user_id, period=None):
+    """Получение словаря, где ключ - имя категории, значение - количество потраченных секунд за период"""
+    user = get_user_from_json_db(user_id)
+    category_time_dict = {}
+    clear_category_time_dict = {}
+
+    if period is None:
+        for category in user['categories']:
+            category_time_dict[category['name']] = category['seconds'] - category['based_seconds']
+
+        for category, time in category_time_dict.items():
+            if time != 0:
+                clear_category_time_dict[category] = time
+
+        return clear_category_time_dict
+
+    else:
+
+        dates = []
+
+        for category in user['categories']:
+            category_time_dict[category['name']] = 0
+
+        for category in user['categories']:
+            for operation in category['operations'][::-1]:
+
+                date = operation['date']
+                seconds = operation['seconds']
+
+                if seconds is None:
+                    seconds = 0
+
+                if len(dates) == period and date not in dates:
+                    continue
+
+                category_time_dict[category['name']] += seconds
+                if date not in dates:
+                    dates.append(date)
+
+        for category, time in category_time_dict.items():
+            if time != 0:
+                clear_category_time_dict[category] = time
+
+        return clear_category_time_dict
+
+
 def get_statistic_by_day_of_week(user_id, period=None):
     """Получение словаря, который хранит часы и сессии для каждого дня недели"""
 
@@ -355,9 +427,8 @@ def get_circle_diagram_sessions_durations(user_id, period=None):
 
     fig, ax = plt.subplots(figsize=(9, 6))
     ax.set_title('Продолжительность сессий')
-    ax.pie(values, labels=labels, autopct='%1.1f%%', shadow=False,
-           wedgeprops={'lw': 1, 'ls': '-', 'edgecolor': 'k'},
-           rotatelabels=True)
+    ax.pie(values, labels=labels, autopct='%1.0f%%', shadow=False,
+           wedgeprops={'lw': 1, 'ls': '-', 'edgecolor': 'k'}, labeldistance=1.05)
     ax.axis('equal')
 
     plt.savefig(f'data/{user_id}_sessions_durations_statistic.png')

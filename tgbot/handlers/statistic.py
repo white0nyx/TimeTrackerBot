@@ -6,8 +6,8 @@ from aiogram.dispatcher.filters import Text
 from aiogram.types import Message, InputFile, MediaGroup, CallbackQuery
 
 from tgbot.keyboards.inline import generate_statistic_period_keyboard
-from tgbot.misc.analytics import get_plot_total_time, get_diagram_week_statistic, get_circle_diagram_sessions_durations,\
-    get_diagram_by_hours_in_day
+from tgbot.misc.analytics import get_plot_total_time, get_diagram_week_statistic, get_circle_diagram_sessions_durations, \
+    get_diagram_by_hours_in_day, get_circle_diagram_time_to_category
 from tgbot.misc.states import States
 from tgbot.misc.work_with_json import get_user_from_json_db, update_user_data, fill_all_categories_past_date
 from tgbot.misc.work_with_text import get_statistic
@@ -55,6 +55,11 @@ async def statistic_button(message: Message, state: FSMContext):
     all_time_plot = InputFile(f'data/{user_id}_total_time.png')
     album.attach_photo(all_time_plot)
 
+    # Диаграмма со статистикой по категориям
+    get_circle_diagram_time_to_category(str(user_id), period_statistic_in_days)
+    diagram_time_to_category = InputFile(f'data/{user_id}_diagram_time_to_category.png')
+    album.attach_photo(diagram_time_to_category)
+
     # Диаграмма со статистикой по дням
     get_diagram_week_statistic(str(user_id), period_statistic_in_days)
     diagram_week_statistic = InputFile(f'data/{user_id}_week_statistic.png')
@@ -76,6 +81,7 @@ async def statistic_button(message: Message, state: FSMContext):
         data['message_text'] = await message.answer(text, reply_markup=generate_statistic_period_keyboard(user_id))
 
     os.remove(f'data/{user_id}_total_time.png')
+    os.remove(f'data/{user_id}_diagram_time_to_category.png')
     os.remove(f'data/{user_id}_week_statistic.png')
     os.remove(f'data/{user_id}_sessions_durations_statistic.png')
     os.remove(f'data/{user_id}_session_count_by_hour_in_day.png')
